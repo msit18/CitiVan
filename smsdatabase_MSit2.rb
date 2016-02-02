@@ -148,40 +148,56 @@ end
 def runNew(callerID, userText)
   #Connects to Cloudant user database
   json = getDBData("http://citivan.cloudant.com/citivan/testSample/")
-  sessions = json["people"]
-  puts sessions
+  callerHashInfo = json["people"]["#{callerID}"]
+  userText.downcase!
 
-  #Find out if CallerID exists
-  if sessions.has_key?(callerID.to_s) == true
+  #Find out if CallerID exists. Create profile if not
+  if json["people"].has_key?(callerID.to_s) == true
     puts "ALREADY EXISTS"
+    if callerHashInfo["convoNum"] > 5 && userText != "back"
+      puts "IF STATEMENT RUNNING"
+      json["people"]["#{callerID}"]["convoNum"] = 0
+      json["people"]["#{callerID}"]["#{callerHashInfo.length}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
+    end
   else
     puts "CREATE NEW PROFILE"
     newCaller = {"1" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}, "convoNum" => 0}
-
     json["people"]["#{callerID}"] = newCaller
-    puts json
-    puts "BREAK--------------------------------------"
-  end
+  end #if/elseEND
 
-  callerHashInfo = json["people"]["#{callerID}"]
   currentConvoNum = callerHashInfo["convoNum"]
   surveyNum = callerHashInfo.length-1 #convoNum item is removed from length
 
-  userText.downcase!
+  #Could put in a while loop in this method
+
+  #BACK CMD
   if userText == "back":
-    puts "back function goes here"
+    puts "BACK FUNCTION"
+    if currentConvoNum <= 6 && currentConvoNum > 0
+      currentConvoNum -= 1
+      json["people"]["#{callerID}"]["convoNum"] -= 1
+      puts "TODO: trigger previous message"
+    else
+      json["people"]["#{callerID}"]["convoNum"] = 0
+      puts "TODO: trigger welcome message"
+
+    end
+
+  #RATE CMD
   elsif userText == "rate":
-    puts "rate function goes here"
+    puts "TODO: rate function goes here"
+
   elsif userText == "exit":
-    puts "delete section that was created"
+    puts "TODO: delete section that was created"
   else
     #Verify that the input is a number. If not, run error message
     if userText.to_i == 0
       puts "RUN ERROR MESSAGE"
     else
-      puts "put info into the system goes here"
+      puts "put info into the system"
       json["people"]["#{callerID}"][surveyNum.to_s][currentConvoNum.to_s] = userText.to_i
       json["people"]["#{callerID}"]["convoNum"] += 1
+      #put info into the bus database
     end #if/elseEND
 
   end #if/elsif/elsif/elseEND
@@ -195,190 +211,7 @@ def runNew(callerID, userText)
   server = Couch::Server.new(url.host, url.port) 
   server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
 
-# #Checks if the callerID exists in the system
-#   if sessions["#{callerID}"] == nil
-#     puts "CREATE NEW PROFILE FOR PERSON"
-
-#     convoNum = 0
-#     timeStamp = Time.now.to_i
-#     newValue = {"0" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}}
-
-#     newUser = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>0, "timeStamp" => "#{timeStamp}", "Message" => messages}
-#     #not certain if I need to have this here
-#     #Produce JSON file from information
-#     doc = <<-JSON
-#     {"users": #{newUser.to_json}}
-#     JSON
-#     puts doc
-
-#   else
-#     puts "THIS CALLERID ALREADY EXISTS"
-#     arrayIndex = sessions["#{callerID}"]["arrayIndex"]
-#     convoNum = sessions["#{callerID}"]["convoNum"]
-#     messages = sessions["#{callerID}"]["Message"]
-#     timeStamp = sessions["#{callerID}"]["timeStamp"]
-#   end #if/elseEND
-
-#   ####################goes through second parameter
-#   extra.downcase!
-
-#   #If the user sent an incorrect reply to an answer, set the convoNum back one and ask
-#   #the question again
-#   #NOT YET TESTED
-#   if extraFilter == "back"
-#     arrayIndex = sessions["users"][i.to_s]["arrayIndex"].to_i
-#     convoNum = sessions["users"][i.to_s]["convoNum"].to_i
-
-#     if convoNum != 0
-#       convoNum = sessions["users"][i.to_s]["convoNum"].to_i - 1
-#       sessions["users"][i.to_s]["convoNum"] = (convoNum).to_s
-#     end
-
-#   else
-#     convoNum = sessions["#{callerID}"]["convoNum"] + 1
-#     puts convoNum
-
-#     #If all four questions have been asked and recorded, 
-#     #increment the array index to start survey again
-#     if convoNum == 6
-#       arrayIndex = sessions["users"][i.to_s]["arrayIndex"].to_i + 1
-#       sessions["users"][i.to_s]["Message"][arrayIndex.to_i] = {}
-      
-#       sessions["users"][i.to_s]["arrayIndex"] = (arrayIndex).to_s
-#       convoNum = 0           
-#       sessions["users"][i.to_s]["convoNum"] = (convoNum).to_s 
-#       timeStamp = Time.now.to_i
-#       sessions["users"][i.to_s]["Message"][arrayIndex][convoNum] = "#{timeStamp}"
-#     else
-#       arrayIndex = sessions["users"][i.to_s]["arrayIndex"].to_i
-#       sessions["users"][i.to_s]["convoNum"] = (convoNum).to_s
-#       sessions["users"][i.to_s]["Message"][arrayIndex][convoNum] = "#{extra}"
-#     end
-#   end
-
 end #defEnd
-
-
-def updateCouchDBData(callerID, extra)
-  excep = false
-
-  begin
-    #Call the getCounchDBData method to get the database information
-    json = getDBData("http://citivan.cloudant.com/citivan/testSample/")
-    puts "PUTTING JSON BELOW"
-    puts json
-    url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
-    server = Couch::Server.new(url.host, url.port) 
-    # if json != nil #####Why would I want to delete the entire database if it's nil?
-    #   server.DELETE("http://citivan.cloudant.com/citivan/testSample/")
-    #   puts "JSON IS NIL"
-    # end
-    #server.put("/mainDataBase", "")
-    puts "SESSIONS BELOW"
-    sessions = json["people"] 
-    puts sessions
-    failover = sessions
-
-    i = 1
-    not_exit = true
-    not_found = true
-    puts sessions["total"]
-
-    while i <= sessions["total"] && not_exit
-      puts "INSIDE WHILE LOOP"
-      puts sessions[i.to_s]
-      #if callerID == sessions["users"][i.to_s]["callerID"]
-      if callerID == sessions["#{callerID}"]
-        puts "INSIDE IF STATEMENT"
-        not_found = false
-        not_exit = false
-
-    #     #If the user sent an incorrect reply to an answer, set the convoNum back one and ask
-    #     #the question again
-    #     if extra == "back" or extra == "Back"
-    #       arrayIndex = sessions["users"][i.to_s]["arrayIndex"].to_i
-    #       convoNum = sessions["users"][i.to_s]["convoNum"].to_i
-
-    #       if convoNum != 0
-    #         convoNum = sessions["users"][i.to_s]["convoNum"].to_i - 1
-    #         sessions["users"][i.to_s]["convoNum"] = (convoNum).to_s
-    #       end
-    #     else
-    #       #The number exists, increment the conversation number
-    #       convoNum = sessions["users"][i.to_s]["convoNum"].to_i + 1
-
-    #       #If all four questions have been asked and recorded, 
-    #       #increment the array index to start survey again
-    #       if convoNum == 6
-    #         arrayIndex = sessions["users"][i.to_s]["arrayIndex"].to_i + 1
-    #         sessions["users"][i.to_s]["Message"][arrayIndex.to_i] = {}
-            
-    #         sessions["users"][i.to_s]["arrayIndex"] = (arrayIndex).to_s
-    #         convoNum = 0           
-    #         sessions["users"][i.to_s]["convoNum"] = (convoNum).to_s 
-    #         timeStamp = Time.now.to_i
-    #         sessions["users"][i.to_s]["Message"][arrayIndex][convoNum] = "#{timeStamp}"
-    #       else
-    #         arrayIndex = sessions["users"][i.to_s]["arrayIndex"].to_i
-    #         sessions["users"][i.to_s]["convoNum"] = (convoNum).to_s
-    #         sessions["users"][i.to_s]["Message"][arrayIndex][convoNum] = "#{extra}"
-    #       end
-    #     end
-      end #ifEnd
-      i += 1
-    end #whileEnd
-
-    #Number does not exist, create it.  
-    if not_found
-      puts "NOT FOUND ACTIVATE"
-      arrayIndex = 0
-      convoNum = 0
-      timeStamp = Time.now.to_i
-      sessions["total"] = (sessions["total"] + 1)
-      messages = Array.new
-      messages[arrayIndex] = {}
-      #sessions["users"]["#{sessions["total"]}"] = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>"0", "timeStamp" => "#{timeStamp}", "Message" => messages}
-      newUser = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>"0", "timeStamp" => "#{timeStamp}", "Message" => messages}
-    end #ifEnd
-
-    #Produce JSON file from information
-    doc = <<-JSON
-    {"users": #{newUser.to_json}}
-    JSON
-    puts "DOC-------------------------------"
-    puts doc
-
-
-  # rescue 
-  #   puts "RESCUE TO THE RESCUE"
-  #   excep = true
-  #   #Check if variable failover is set.
-  #   #Update the db only if failover is set.   
-  #   if failover == sessions
-  #     excep = false
-  #     #An exception was thrown, update the DB with the original session
-  #     #The original session in this case is in the variable "sessions"
-  #     #Get JSON ready
-  #     doc = <<-JSON
-  #     {"type":"SMS Database","people": #{failover.to_json}}
-  #     JSON
-  #   end #ifEnd
-
-  ensure
-    puts "running ENSURE"
-    if failover != nil && sessions != nil && excep == false
-       # need to add if failover != null
-      #If not, then update the DB with the new information 
-      #send the JSON back to the database
-      puts doc.strip
-      server.PUT("http://citivan.cloudant.com/citivan/testSample/", doc.strip) 
-      return convoNum
-    end #ifEnd
-
-  end #begin/rescue/ensureEnd
- 
-end #defEnd
-
 
 
 ###Main method starts here:
@@ -414,5 +247,6 @@ messages = [
 #Execute code here
 #tryAdd(777999000, "extra")
 #updateCouchDBData(666999000, "extra")
-runNew(555999000, "extra")
-runNew(333888000, "extra")
+#runNew(555999000, "back")
+runNew(111888000, "input")
+#runNew(333888000, "back")

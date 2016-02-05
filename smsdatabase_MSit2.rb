@@ -1,5 +1,5 @@
 #Original code written by Wajeeha Ahmad and Tawanda Zimuto
-#Major edits by Michelle Sit
+#This code is written by Michelle Sit
 
 #Notes:
 #When putting values into the hash table, you must input the values into the variable "json".
@@ -9,6 +9,14 @@
 #be stored in the json that is written.
 
 #For Cloudant, you must include the _id and _rev to write to the online database
+
+#convoNum behaviors - It must never go to 0 otherwise there will be one too many survey items
+#- At 1 = lowest number. back and exit functions should reset to 1. input +1
+#- At 5 = back should -1, input should +1
+#- At 6 = back should -1 to give last survey item. If input, produce new survey set, reset
+#convoNum to 1
+
+#Everything in the json starts from 1 instead of 0. This is to improve readability.
 
 require 'rubygems' 
 require 'net/http' 
@@ -151,70 +159,111 @@ def runNew(callerID, userText)
   callerHashInfo = json["people"]["#{callerID}"]
   userText.downcase!
 
-  #Find out if CallerID exists. Create profile if not
+  ###DOES USER EXIST? If so, then all the other functions are allowed.
+  #If this is a new user, disregard the input text and just create a new profile
   if json["people"].has_key?(callerID.to_s) == true
-    puts "ALREADY EXISTS"
-    if callerHashInfo["convoNum"] > 5 && userText != "back"
-      puts "IF STATEMENT RUNNING"
-      json["people"]["#{callerID}"]["convoNum"] = 0
+    puts "Note: USER ALREADY EXISTS"
+
+    #Creates new survey hash if last is full
+    if callerHashInfo["convoNum"] > 5 && userText != "back" && userText != "rate" && userText != "exit"
+      puts "Note: IF STATEMENT RUNNING"
+      json["people"]["#{callerID}"]["convoNum"] = 1
       json["people"]["#{callerID}"]["#{callerHashInfo.length}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
     end
-  else
-    puts "CREATE NEW PROFILE"
-    newCaller = {"1" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}, "convoNum" => 0}
-    json["people"]["#{callerID}"] = newCaller
-  end #if/elseEND
 
-  currentConvoNum = callerHashInfo["convoNum"]
-  surveyNum = callerHashInfo.length-1 #convoNum item is removed from length
+    currentConvoNum = callerHashInfo["convoNum"]
+    surveyNum = callerHashInfo.length-1 #Note: convoNum item is removed from length
 
-  #Could put in a while loop in this method
+    ###BACK CMD
+    #TODO: Remove info from bus database
+    if userText == "back":
+      puts "Note: BACK FUNCTION"
+      if currentConvoNum <= 6 && currentConvoNum > 1
+        currentConvoNum -= 1
+        json["people"]["#{callerID}"]["convoNum"] -= 1
+        puts "TODO: Remove info from bus database"
+        puts "Previous message sent"
+      else
+        json["people"]["#{callerID}"]["convoNum"] = 1
+        puts "Welcome message sent"
+      end
 
-  #BACK CMD
-  if userText == "back":
-    puts "BACK FUNCTION"
-    if currentConvoNum <= 6 && currentConvoNum > 0
-      currentConvoNum -= 1
-      json["people"]["#{callerID}"]["convoNum"] -= 1
-      puts "TODO: trigger previous message"
+    ###RATE CMD
+    #TODO: Pull info from bus database
+    elsif userText == "rate":
+      puts "TODO: rate function goes here"
+
+    ###EXIT CMD
+    #TODO: user feedback msg
+    #TODO: REMOVE VALUES FROM BUS INFO DATABASE
+    elsif userText == "exit":
+      puts "Note: Deleted survey"
+      json["people"]["#{callerID}"].delete(surveyNum.to_s)
+      #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
+      json["people"]["#{callerID}"]["convoNum"] = 6
+      puts "TODO: USER FEEDBACK MSG"
+
+    ###INPUT TEXT INTO SURVEY
+    #TODO: run error message
+    #TODO: put info into the bus database
+    #TODO: NEED TO CONSIDER THAT THE ANSWERS WILL BE WORDS
     else
-      json["people"]["#{callerID}"]["convoNum"] = 0
-      puts "TODO: trigger welcome message"
-
-    end
-
-  #RATE CMD
-  elsif userText == "rate":
-    puts "TODO: rate function goes here"
-
-  elsif userText == "exit":
-    puts "TODO: delete section that was created"
-  else
-    #Verify that the input is a number. If not, run error message
-    if userText.to_i == 0
-      puts "RUN ERROR MESSAGE"
-    else
-      puts "put info into the system"
+      #TODO: Verify that the input is appropriate. If not, run error message
+      if userText.to_i == 0
+        puts "TODO: RUN ERROR MESSAGE"
+      else
+      puts "Note: info into the system"
       json["people"]["#{callerID}"][surveyNum.to_s][currentConvoNum.to_s] = userText.to_i
       json["people"]["#{callerID}"]["convoNum"] += 1
-      #put info into the bus database
-    end #if/elseEND
+      puts "TODO: put info into the bus database"
+      end
 
-  end #if/elsif/elsif/elseEND
-  
-  #TODO: CHECK IF ANY OF THE VALUES ARE A 0. IT MEANS THEY MISSED SOMETHING
+    end
+    
+    #TODO: CHECK IF ANY OF THE VALUES ARE A 0. IT MEANS THEY MISSED SOMETHING
 
-  jsonFormat = json.to_json
-  puts jsonFormat
+  ###NEW USER. Create new account. Disregarded input text.
+  else
+    puts "Note: CREATE NEW PROFILE"
+    newCaller = {"1" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}, "convoNum" => 1}
+    json["people"]["#{callerID}"] = newCaller
+  end
 
-  url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
-  server = Couch::Server.new(url.host, url.port) 
-  server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
+  #TODO: NEED RESCUE METHOD?
 
-end #defEnd
+  ensure
+    ###Note: store information into user database
+    jsonFormat = json.to_json
+    url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
+    server = Couch::Server.new(url.host, url.port) 
+    server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
+    puts "CONVONUMBER IS: "
+
+    return json["people"]["#{callerID}"]["convoNum"]
+end #def/ensureEnd
+
+def simulateSMS(callerID, initialText)
+  #This variable will use the users response to give the appropriate answer
+  reply = initialText.downcase!
+  #This variable will correspond to which message should be played
+  status = runNew(callerID, reply)
+  puts status
+
+  if reply == "help"
+    say "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"exit\" to discard your answers and start over."
+  elsif status == 1
+    say "Welcome to CitiVan! Please answer the following questions." #TODO: ADD MORE INFO ABOUT FUNCTIONS
+    wait(3000)
+    say "#{questions[status-1.to_i]}"
+  else #NEED BETTER VERIFICATION SYSTEM FOR YOU CHOSE PART
+    say "You chose #{reply}. #{questions[status-1.to_i]}"
+
+  end
+
+end
 
 
-###Main method starts here:
+############### Main method starts here:
 
 #Text messages to send to user
 messages = [
@@ -244,9 +293,72 @@ messages = [
 "message"=>"6. Thank you for your responses! Have a great day."}
 ]
 
-#Execute code here
-#tryAdd(777999000, "extra")
-#updateCouchDBData(666999000, "extra")
-#runNew(555999000, "back")
-runNew(111888000, "input")
-#runNew(333888000, "back")
+questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
+"3. Was your driver speeding? Pick 1 or 2. 1) Yes 2) No.", "4. Was your driver courteous? Pick 1 or 2. 1) Yes 2) No.",
+"5. Was your minibus clean? Pick 1 or 2. 1) Yes 2) No.", "6. Thank you for your responses! Have a great day."]
+
+###################Execute code here
+simulateSMS(8583807847, "hi")
+
+
+
+# if currentCall
+#   #This variable will use the users response to give the appropriate answer
+#   reply = currentCall.initialText.downcase!
+#   #This variable will correspond to which message should be played
+#   status = runNew(currentCall.callerID, reply)
+#   puts status
+
+#   if reply == "help"
+#     say "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"exit\" to discard your answers and start over."
+#   elsif status == 1
+#     say "Welcome to CitiVan! Please answer the following questions." #TODO: ADD MORE INFO ABOUT FUNCTIONS
+#     wait(3000)
+#     say "#{questions[status-1.to_i]}"
+#   else #NEED BETTER VERIFICATION SYSTEM FOR YOU CHOSE PART
+#     say "You chose #{reply}. #{questions[status-1.to_i]}"
+
+#   end
+
+#   hangup
+
+
+#   # if $status == 1
+#   #     say "#{messages[$status.to_i]['value']} #{reply}. #{messages[$status.to_i]['message']}"
+  
+#   # #If this is a new user, send the first message out, create the user and start the first session.
+#   # elsif $status == 0
+#   # #This sends the initial message with the first question
+#   #   say "#{messages[$status.to_i]['1']}"
+#   #   wait(3000)
+#   #   say "#{messages[$status.to_i]['message']}"
+#   # else
+#   #   #If the user responds with an answer that does not correspond to my answers,
+#   #   #It will ask the question again
+#   #   if messages[$status.to_i][$reply] == nil 
+#   #     $newStatus = runNew($currentCall.callerID, "back") 
+#   #     say "Sorry, you have entered a wrong choice. #{messages[$newStatus.to_i]['message']}" 
+#   #   else
+#   #     say "#{messages[$status.to_i][$reply]} #{messages[$status.to_i]['message']}"
+#   #   end
+#   # end
+  
+#   # #There is no reason to keep the session alive, so we hangup 
+#   # hangup
+ 
+# else  
+#   #Grab the $numToDial parameter and initiate the SMS conversation
+#   event = call(numToDial, {:network => "SMS"})
+   
+#   #This primarily updates the database with the new number. This variable should always be 0.
+#   status = runNew(numToDial, currentCall.initialText)
+  
+#   #This sends the initial message with the first question
+#   say "Welcome to CitiVan! Please answer the following questions."
+#   wait(3000)
+#   say "#{questions[status-1.to_i]}"
+  
+#   #There is no reason to keep the session alive, so we hangup 
+#   hangup
+ 
+# end

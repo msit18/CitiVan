@@ -16,7 +16,8 @@
 #- At 6 = back should -1 to give last survey item. If input, produce new survey set, reset
 #convoNum to 1
 
-#Everything in the json starts from 1 instead of 0. This is to improve readability.
+#Everything in the json starts from 1 instead of 0. This is to improve readability for
+#non-computer science people.
 
 require 'rubygems' 
 require 'net/http' 
@@ -45,7 +46,6 @@ module Couch
     end 
 
     def GET(uri) 
-      puts uri
       request(Net::HTTP::Get.new(uri)) 
     end 
 
@@ -66,197 +66,163 @@ end
  
 #This is a helper method to get data from couchDB 
 def getDBData(urlInput)
-  puts "RUNNING getDBData"
   url = URI.parse(urlInput)
   server = Couch::Server.new(url.host, url.port)
   res = server.GET(urlInput)
   json = JSON.parse(res.body)
 end
 
-def runthething(callerID, extra)
-  puts "---------------------------------------------------"
-  #json = getCounchDBData
-  json = getDBData("http://citivan.cloudant.com/citivan/_all_docs?")
-  puts "PUTTING JSON BELOW"
-  puts json
-  url = URI.parse("http://citivan.cloudant.com/citivan/") 
-  server = Couch::Server.new(url.host, url.port)
-
-  puts "SESSIONS BELOW"
-  sessions = json["people"] 
-  puts sessions
-
-  i = 1
-  puts sessions["total"]
-
-  puts "NOT FOUND ACTIVATE"
-  arrayIndex = 0
-  convoNum = 0
-  timeStamp = Time.now.to_i
-  sessions["total"] = (sessions["total"] + 1)
-  messages = Array.new
-  messages[arrayIndex] = {}
-  #sessions["users"]["#{sessions["total"]}"] = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>"0", "timeStamp" => "#{timeStamp}", "Message" => messages}
-  newUser = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>"0", "timeStamp" => "#{timeStamp}", "Message" => messages}
-  puts "NEW USER"
-  puts newUser
-  puts newUser.to_json
-
-  puts "VARRRRRR"
-  var = sessions["total"]+1
-  puts var
-  puts json
-  puts json["people"]["total"]
-  json["people"]["total"] = var
-  puts json
-
-  idNum = json["_id"]
-  puts idNum
-  revNum = json["_rev"]
-  puts revNum
-
-  doc = <<-JSON
-  {"_id": #{idNum.to_json},
-  "_rev": #{revNum.to_json},
-  "people": {
-    "total": #{var.to_json},
-    "#{callerID}": #{newUser.to_json}}
-  }
-  JSON
-
-  puts doc
-
-  server.PUT("http://citivan.cloudant.com/citivan/testSample/", doc)
-
-end
-
-def tryAdd (callerID, extra)
-  json = getDBData("http://citivan.cloudant.com/citivan/mainDataBase/")
-  puts json
-  puts "JSON----------------------------------------"
-  sessions = json["people"]["users"]
-  puts sessions
-  puts sessions.length+1
-  puts "SESSIONS------------------------------------"
-
-  newValue = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
-
-  json["people"]["users"]["#{sessions.length+1}"] = newValue
-  puts json
-  jsonFormat = json.to_json
-  puts jsonFormat
-
-  url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
-  server = Couch::Server.new(url.host, url.port) 
-  server.PUT("http://citivan.cloudant.com/citivan/mainDataBase/", jsonFormat) 
-
-
-end
-
 def runNew(callerID, userText)
   #Connects to Cloudant user database
   json = getDBData("http://citivan.cloudant.com/citivan/testSample/")
   callerHashInfo = json["people"]["#{callerID}"]
-  userText.downcase!
 
-  ###DOES USER EXIST? If so, then all the other functions are allowed.
-  #If this is a new user, disregard the input text and just create a new profile
-  if json["people"].has_key?(callerID.to_s) == true
-    puts "Note: USER ALREADY EXISTS"
+  begin
+    ###DOES USER EXIST? If so, then all the other functions are allowed.
+    #If this is a new user, disregard the input text and just create a new profile
+    if json["people"].has_key?(callerID.to_s) == true
+      puts "VERIFY USER EXISTS: USER ALREADY EXISTS"
 
-    #Creates new survey hash if last is full
-    if callerHashInfo["convoNum"] > 5 && userText != "back" && userText != "rate" && userText != "exit"
-      puts "Note: IF STATEMENT RUNNING"
-      json["people"]["#{callerID}"]["convoNum"] = 1
-      json["people"]["#{callerID}"]["#{callerHashInfo.length}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
-    end
-
-    currentConvoNum = callerHashInfo["convoNum"]
-    surveyNum = callerHashInfo.length-1 #Note: convoNum item is removed from length
-
-    ###BACK CMD
-    #TODO: Remove info from bus database
-    if userText == "back":
-      puts "Note: BACK FUNCTION"
-      if currentConvoNum <= 6 && currentConvoNum > 1
-        currentConvoNum -= 1
-        json["people"]["#{callerID}"]["convoNum"] -= 1
-        puts "TODO: Remove info from bus database"
-        puts "Previous message sent"
-      else
+      #Creates new survey hash if last is full
+      if callerHashInfo["convoNum"] > 5 && userText != "back" && userText != "rate" && userText != "cancel"
+        puts "CREATING NEW SURVEY HASH. LAST SURVEY IS FULL"
         json["people"]["#{callerID}"]["convoNum"] = 1
-        puts "Welcome message sent"
+        json["people"]["#{callerID}"]["#{callerHashInfo.length}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
       end
 
-    ###RATE CMD
-    #TODO: Pull info from bus database
-    elsif userText == "rate":
-      puts "TODO: rate function goes here"
+      currentConvoNum = callerHashInfo["convoNum"]
+      surveyNum = callerHashInfo.length-2 #Note: convoNum and noMoreCancel item is removed from length
+      overrideReturnValue = ""
 
-    ###EXIT CMD
-    #TODO: user feedback msg
-    #TODO: REMOVE VALUES FROM BUS INFO DATABASE
-    elsif userText == "exit":
-      puts "Note: Deleted survey"
-      json["people"]["#{callerID}"].delete(surveyNum.to_s)
-      #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
-      json["people"]["#{callerID}"]["convoNum"] = 6
-      puts "TODO: USER FEEDBACK MSG"
+      ###BACK CMD
+      #TODO: Remove info from bus database
+      if userText == "back" && json["people"]["#{callerID}"]["noMoreCancel"] = false:
+        puts "BACK FUNCTION SUCCESS"
+        if currentConvoNum <= 6 && currentConvoNum > 1
+          currentConvoNum -= 1
+          json["people"]["#{callerID}"]["convoNum"] -= 1
+          # "TODO: Remove info from bus database"
+          puts "Previous message sent"
+        else
+          json["people"]["#{callerID}"]["convoNum"] = 1
+          puts "Welcome message sent"
+        end
+      elsif userText == "back" && json["people"]["#{callerID}"]["noMoreCancel"] = true:
+        puts "BACK FUNCTION: overrideReturnValue activated"
+        overrideReturnValue = "Sorry, you cannot go back. Please start a new survey by sending another message."
 
-    ###INPUT TEXT INTO SURVEY
-    #TODO: run error message
-    #TODO: put info into the bus database
-    #TODO: NEED TO CONSIDER THAT THE ANSWERS WILL BE WORDS
-    else
-      #TODO: Verify that the input is appropriate. If not, run error message
-      if userText.to_i == 0
-        puts "TODO: RUN ERROR MESSAGE"
+      ###RATE CMD
+      #TODO: Pull info from bus database
+      elsif userText == "rate":
+        puts "TODO: rate function goes here"
+
+      ###EXIT CMD
+      #TODO: REMOVE VALUES FROM BUS INFO DATABASE
+      elsif userText == "cancel":
+        puts "CANCEL FUNCTION: Deleted survey"
+        json["people"]["#{callerID}"].delete(surveyNum.to_s)
+        #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
+        json["people"]["#{callerID}"]["convoNum"] = 6
+        json["people"]["#{callerID}"]["noMoreCancel"] = true
+
+      ###INPUT TEXT INTO SURVEY
+      #TODO: run error message
+      #TODO: put info into the bus database
+      #TODO: NEED TO CONSIDER THAT THE ANSWERS WILL BE WORDS
       else
-      puts "Note: info into the system"
-      json["people"]["#{callerID}"][surveyNum.to_s][currentConvoNum.to_s] = userText.to_i
-      json["people"]["#{callerID}"]["convoNum"] += 1
-      puts "TODO: put info into the bus database"
+        puts "INPUTTING DATA FUNCTION"
+        #TODO: Verify that the input is appropriate. If not, run error message
+        if userText.to_i == 0 && currentConvoNum != 1
+          puts "TODO: RUN ERROR MESSAGE"
+        else
+          puts "INFO INTO SURVEY SYSTEM"
+          if json["people"]["#{callerID}"][surveyNum.to_s] == nil
+            raise "nilError"
+          else
+            json["people"]["#{callerID}"][surveyNum.to_s][currentConvoNum.to_s] = userText.to_i
+            json["people"]["#{callerID}"]["convoNum"] += 1
+            json["people"]["#{callerID}"]["noMoreCancel"] = false
+            puts "TODO: put info into the bus database"
+          end
+        end
+
       end
+      
+      #TODO: CHECK IF ANY OF THE VALUES ARE A 0. IT MEANS THEY MISSED SOMETHING
 
+    ###NEW USER. Create new account. Disregarded input text.
+    else
+      puts "VERIFY USER EXISTS: CREATE NEW PROFILE"
+      newCaller = {"1" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}, "convoNum" => 1, "noMoreCancel" => false}
+      json["people"]["#{callerID}"] = newCaller
     end
-    
-    #TODO: CHECK IF ANY OF THE VALUES ARE A 0. IT MEANS THEY MISSED SOMETHING
 
-  ###NEW USER. Create new account. Disregarded input text.
+  rescue => nilError
+    puts "rescued"
+
+  #TODO: rescue section. WHAT HAPPENS WHEN TWO SURVEYS HAVE THE SAME NUMBER? CREATE FOR LOOP TO INCREMENT DATA UP
+  #WHAT HAPPENS WHEN A SURVEY ITEM IS INCORRECT? MAKE SURE IT GETS REMOVED AND QUESTION GETS ASKED AGAIN
+
+  ###Note: store information into user database
+  puts "RUN ENSURE"
+  jsonFormat = json.to_json
+  url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
+  server = Couch::Server.new(url.host, url.port) 
+  server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
+  if overrideReturnValue == ""
+    returnValue = json["people"]["#{callerID}"]["convoNum"]
   else
-    puts "Note: CREATE NEW PROFILE"
-    newCaller = {"1" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}, "convoNum" => 1}
-    json["people"]["#{callerID}"] = newCaller
+    returnValue = overrideReturnValue
   end
-
-  #TODO: NEED RESCUE METHOD?
+  puts returnValue
+  #returnValue = json["people"]["#{callerID}"]["convoNum"]
+  puts "CONVONUMBER IS: #{returnValue}"
 
   ensure
-    ###Note: store information into user database
-    jsonFormat = json.to_json
-    url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
-    server = Couch::Server.new(url.host, url.port) 
-    server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
-    puts "CONVONUMBER IS: "
+      ###Note: store information into user database
+    # puts "RUN ENSURE"
+    # jsonFormat = json.to_json
+    # url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
+    # server = Couch::Server.new(url.host, url.port) 
+    # server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
+    # # if overrideReturnValue == ""
+    # #   returnValue = json["people"]["#{callerID}"]["convoNum"]
+    # # else
+    # #   returnValue = overrideReturnValue
+    # # end
+    # returnValue = json["people"]["#{callerID}"]["convoNum"]
+    # puts "CONVONUMBER IS: #{returnValue}"
+    puts "RETURNVALUE: #{returnValue}"
+  return returnValue
+  
+  end #begin/ensureEnd
 
-    return json["people"]["#{callerID}"]["convoNum"]
-end #def/ensureEnd
+end #defEnd
 
+def report_error(error_message)
+  (Thread.current[:errors] ||= []) << "#{error_message}"
+end
+
+#TODO: NEED A WAY TO SEND ERROR MESSAGE TO USERS IF THEIR ANSWER IS NOT INPUTED
+#TODO: DON'T NEED TO SEND WELCOME MESSAGE EVERY SINGLE TIME THE SURVEY STARTS
 def simulateSMS(callerID, initialText)
   #This variable will use the users response to give the appropriate answer
-  reply = initialText.downcase!
+  reply = initialText.downcase
   #This variable will correspond to which message should be played
   status = runNew(callerID, reply)
-  puts status
 
   if reply == "help"
-    say "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"exit\" to discard your answers and start over."
+    puts "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"cancel\" to discard your survey."
+  elsif reply == "cancel"
+    puts "Your current survey has been deleted. Thank you!"
   elsif status == 1
-    say "Welcome to CitiVan! Please answer the following questions." #TODO: ADD MORE INFO ABOUT FUNCTIONS
-    wait(3000)
-    say "#{questions[status-1.to_i]}"
+    puts "Welcome to CitiVan! Please answer the following questions." #TODO: ADD MORE INFO ABOUT FUNCTIONS
+    #wait(3000)
+    puts "#{$questions[status-1.to_i]}"
+  elsif status.class != Integer
+    puts "Sorry, you have entered a wrong choice. Please try again! Reply with \"help\" for a list of commands."
   else #NEED BETTER VERIFICATION SYSTEM FOR YOU CHOSE PART
-    say "You chose #{reply}. #{questions[status-1.to_i]}"
+    puts "You chose #{reply}. #{$questions[status-1.to_i]}"
 
   end
 
@@ -293,12 +259,12 @@ messages = [
 "message"=>"6. Thank you for your responses! Have a great day."}
 ]
 
-questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
+$questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
 "3. Was your driver speeding? Pick 1 or 2. 1) Yes 2) No.", "4. Was your driver courteous? Pick 1 or 2. 1) Yes 2) No.",
 "5. Was your minibus clean? Pick 1 or 2. 1) Yes 2) No.", "6. Thank you for your responses! Have a great day."]
 
 ###################Execute code here
-simulateSMS(8583807847, "hi")
+simulateSMS(8583807847, "1")
 
 
 
@@ -361,4 +327,91 @@ simulateSMS(8583807847, "hi")
 #   #There is no reason to keep the session alive, so we hangup 
 #   hangup
  
+# end
+
+
+
+
+
+
+
+
+# def runthething(callerID, extra)
+#   puts "---------------------------------------------------"
+#   #json = getCounchDBData
+#   json = getDBData("http://citivan.cloudant.com/citivan/_all_docs?")
+#   puts "PUTTING JSON BELOW"
+#   puts json
+#   url = URI.parse("http://citivan.cloudant.com/citivan/") 
+#   server = Couch::Server.new(url.host, url.port)
+
+#   puts "SESSIONS BELOW"
+#   sessions = json["people"] 
+#   puts sessions
+
+#   i = 1
+#   puts sessions["total"]
+
+#   puts "NOT FOUND ACTIVATE"
+#   arrayIndex = 0
+#   convoNum = 0
+#   timeStamp = Time.now.to_i
+#   sessions["total"] = (sessions["total"] + 1)
+#   messages = Array.new
+#   messages[arrayIndex] = {}
+#   #sessions["users"]["#{sessions["total"]}"] = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>"0", "timeStamp" => "#{timeStamp}", "Message" => messages}
+#   newUser = {"callerID"=>"#{callerID}", "arrayIndex"=>"#{arrayIndex}", "convoNum"=>"0", "timeStamp" => "#{timeStamp}", "Message" => messages}
+#   puts "NEW USER"
+#   puts newUser
+#   puts newUser.to_json
+
+#   puts "VARRRRRR"
+#   var = sessions["total"]+1
+#   puts var
+#   puts json
+#   puts json["people"]["total"]
+#   json["people"]["total"] = var
+#   puts json
+
+#   idNum = json["_id"]
+#   puts idNum
+#   revNum = json["_rev"]
+#   puts revNum
+
+#   doc = <<-JSON
+#   {"_id": #{idNum.to_json},
+#   "_rev": #{revNum.to_json},
+#   "people": {
+#     "total": #{var.to_json},
+#     "#{callerID}": #{newUser.to_json}}
+#   }
+#   JSON
+
+#   puts doc
+
+#   server.PUT("http://citivan.cloudant.com/citivan/testSample/", doc)
+
+# end
+
+# def tryAdd (callerID, extra)
+#   json = getDBData("http://citivan.cloudant.com/citivan/mainDataBase/")
+#   puts json
+#   puts "JSON----------------------------------------"
+#   sessions = json["people"]["users"]
+#   puts sessions
+#   puts sessions.length+1
+#   puts "SESSIONS------------------------------------"
+
+#   newValue = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
+
+#   json["people"]["users"]["#{sessions.length+1}"] = newValue
+#   puts json
+#   jsonFormat = json.to_json
+#   puts jsonFormat
+
+#   url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
+#   server = Couch::Server.new(url.host, url.port) 
+#   server.PUT("http://citivan.cloudant.com/citivan/mainDataBase/", jsonFormat) 
+
+
 # end

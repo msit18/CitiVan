@@ -77,16 +77,27 @@ class Citivan
     json = JSON.parse(res.body)
   end
 
-#Verify that this is working
-  def getBusName(callerID)
+  def getBusName(callerID, userText)
     puts "GETBUSNAME RUNNING"
     puts "VERIFY BUS EXISTS: #{@json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]}"
     @busName = @json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]
-    if @busJson.has_key?(@busName.to_s) == false
-      @busJson["#{@busName}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0, "6" => 0, "7" => 0, "8" => 0, "9" => 0, "10" => 0}
+    puts "BUSNAME: #{@busName}"
+    if @busName.to_s == "0"
+      @busName = userText
+      if @busJson.has_key?(userText.to_s) == false
+        puts "CREATING NEW BUS DATA"
+        @busJson["#{userText}"] = {"1" => "#{userText}", "2" => 0, "3" => 0, "4" => 0, "5" => 0, "6" => 0, "7" => 0, "8" => 0, "9" => 0, "10" => 0}
+      end
+      puts "MAYBE CREATED NEW SURVEY?"
     end
-    puts "END OF BUSNAME"
     return @busName
+  end
+
+  def calculateAverage(questionNum)
+    for i in 2..5
+      puts "i: #{i}"
+      avg = (@busJson["#{@busName}"]["#{i}"])/(@busJson["#{@busName}"]["#{i +5}"])
+      puts "AVG: #{avg}"
   end
 
   def runNew(callerID, userText)
@@ -99,10 +110,11 @@ class Citivan
         puts "VERIFY USER EXISTS: USER ALREADY EXISTS"
 
         currentConvoNum = @callerHashInfo["convoNum"]
-        puts "CURRENTCONVONUM LENGTH: #{@callerHashInfo.length}"
+        puts "NUM ITEMS IN CALLERID: #{@callerHashInfo.length}"
         @surveyNum = @callerHashInfo.length-2 #Note: convoNum and noMoreCancel item is removed from length
         overrideReturnValue = nil
         @busJson = getDBData("http://citivan.cloudant.com/citivan/busData/")
+        getBusName(callerID, userText)
 
         #Creates new survey hash if last is full
         if @callerHashInfo["convoNum"] > 5 && userText != "back" && userText != "rate" && userText != "cancel"
@@ -110,10 +122,9 @@ class Citivan
           @json["people"]["#{callerID}"]["convoNum"] = 1
           @json["people"]["#{callerID}"]["#{@callerHashInfo.length-1}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
 
-  ##errors following here:
         ###BACK CMD
         #TODO: Remove info from bus database
-        elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == false:
+        elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == false
           puts "BACK FUNCTION SUCCESS"
           if currentConvoNum <= 6 && currentConvoNum > 1
             currentConvoNum -= 1
@@ -125,28 +136,41 @@ class Citivan
             puts "Welcome message sent"
           end
 
-        elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == true:
+        elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == true
           puts "BACK FUNCTION: overrideReturnValue activated"
           overrideReturnValue = "Sorry, you cannot go back. Please start a new survey by sending another message."
 
         ###RATE CMD
         #TODO: Pull info from bus database
-        elsif userText == "rate":
+        elsif userText == "rate"
           puts "TODO: rate function goes here"
-          getBusName(callerID)
+          #getBusName(callerID, userText)
           puts "BUSNAME: #{@busName}"
+          if @busJson["#{@busName}"].has_value?(0)
+            puts "BUS HAS NOT BEEN RATED YET"
+            overrideReturnValue = "This bus has not been rated yet."
+          else
+            puts "BUS RATING IS THE FOLLOWING"
 
-        ###EXIT CMD
-        #TODO: REMOVE VALUES FROM BUS INFO DATABASE
-        elsif userText == "cancel":
+            overrideReturnValue = "#{@busName}: Question1: #{}"
+          end
+
+        #fin
+        ###CANCEL CMD
+        elsif userText == "cancel"
+          #getBusName(callerID, userText)
           puts "CANCEL FUNCTION: Deleted survey"
           @json["people"]["#{callerID}"].delete("#{@surveyNum}")
           #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
           @json["people"]["#{callerID}"]["convoNum"] = 6
           @json["people"]["#{callerID}"]["noMoreCancel"] = true
+          @busJson["#{@busName}"]["6"] -= 1
+          for i in 2..5
+            @busJson["#{@busName}"]["#{i}"] -= @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{i}"]
+            @busJson["#{@busName}"]["#{i +5}"] -= 1
+          end
 
         ###INPUT TEXT INTO SURVEY
-        #TODO: run error message
         #TODO: error handling if NIL
         #TODO: NEED TO CONSIDER THAT THE ANSWERS WILL BE WORDS
         else
@@ -160,13 +184,19 @@ class Citivan
               puts "RAISING NIL ERROR BECAUSE I'M THE WORST"
               raise "nilError"
             else
-              getBusName(callerID)
+              #getBusName(callerID, userText)
               puts "BUSNAME: #{@busName}"
-              @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = userText.to_i
-              @busJson["#{@busName}"]["#{currentConvoNum}"] += userText.to_i
+              puts "#{@json["people"]["#{callerID}"]["convoNum"]}"
+              if @json["people"]["#{callerID}"]["convoNum"] == 1
+                puts "INPUT BUS NAME"
+                @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = userText
+              else
+                puts "INPUT VALUE"
+                @busJson["#{@busName}"]["#{currentConvoNum}"] += userText.to_i
+                @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = userText.to_i
+              end
               @busJson["#{@busName}"]["#{currentConvoNum +5}"] += 1
               @json["people"]["#{callerID}"]["convoNum"] += 1
-
               @json["people"]["#{callerID}"]["noMoreCancel"] = false
             end
           end
@@ -174,9 +204,9 @@ class Citivan
         end
         
         #TODO: CHECK IF ANY OF THE VALUES ARE A 0. IT MEANS THEY MISSED SOMETHING
+        #TODO: rescue section. WHAT HAPPENS WHEN TWO SURVEYS HAVE THE SAME NUMBER? CREATE FOR LOOP TO INCREMENT DATA UP
 
-      ###NEW USER. Create new account. Disregarded input text.
-      else
+      else ###NEW USER. Create new account. Disregarded input text.
         puts "VERIFY USER EXISTS: CREATE NEW PROFILE"
         newCaller = {"1" => {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}, "convoNum" => 1, "noMoreCancel" => false}
         @json["people"]["#{callerID}"] = newCaller
@@ -187,17 +217,21 @@ class Citivan
 
     rescue => incorrectInput
       puts "INCORRECT INPUT FOOL"
-    #TODO: rescue section. WHAT HAPPENS WHEN TWO SURVEYS HAVE THE SAME NUMBER? CREATE FOR LOOP TO INCREMENT DATA UP
-
+    
     ensure
       puts "overrideReturnValue: #{overrideReturnValue}"
       if overrideReturnValue == nil
-        ###Note: store information into user database
+        ###Note: store information into user databases
         returnValue = @json["people"]["#{callerID}"]["convoNum"]
         jsonFormat = @json.to_json
         url = URI.parse("http://citivan.cloudant.com/citivan/testSample/") 
         server = Couch::Server.new(url.host, url.port) 
         server.PUT("http://citivan.cloudant.com/citivan/testSample/", jsonFormat) 
+
+        busJsonFormat = @busJson.to_json
+        busUrl = URI.parse("http://citivan.cloudant.com/citivan/busData/") 
+        busServer = Couch::Server.new(url.host, url.port) 
+        busServer.PUT("http://citivan.cloudant.com/citivan/busData/", busJsonFormat)
       else
         returnValue = overrideReturnValue
       end
@@ -238,40 +272,12 @@ end
 ############### Main method starts here:
 
 #Text messages to send to user
-  messages = [
-  {"1"=>"Welcome to CitiVan! Please answer the following questions.",
-  "message"=> "1. What is your bus number?"},
-   
-  {"value" => "Your bus number is ", 
-  "message" => "2. Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent."}, 
-   
-  {"1" => "You chose 1.", 
-  "2"=>"You chose 2.", 
-  "3" => "You chose 3.", 
-  "4" => "You chose 4.",
-  "5" => "You chose 5.",
-  "message"=>"3. Was your driver speeding? Pick 1 or 2. 1) Yes 2) No."},
-   
-  {"1"=>"You chose 1.", 
-  "2"=>"You chose 2.",
-  "message"=>"4. Was your driver courteous? Pick 1 or 2. 1) Yes 2) No."},
-   
-  {"1"=>"You chose 1.", 
-  "2"=>"You chose 2.",
-  "message"=>"5. Was your minibus clean? Pick 1 or 2. 1) Yes 2) No."},
-   
-  {"1"=>"You chose 1.", 
-  "2"=>"You chose 2.",
-  "message"=>"6. Thank you for your responses! Have a great day."}
-  ]
-
   $questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
   "3. Was your driver speeding? Pick 1 or 2. 1) Yes 2) No.", "4. Was your driver courteous? Pick 1 or 2. 1) Yes 2) No.",
   "5. Was your minibus clean? Pick 1 or 2. 1) Yes 2) No.", "6. Thank you for your responses! Have a great day."]
 
   ###################Execute code here
-  simulateSMS(111222333, "1")
-
+  simulateSMS(111222333, "cancel")
 
 
 

@@ -77,13 +77,16 @@ class Citivan
     json = JSON.parse(res.body)
   end
 
-  def deleteBusInfo(callerID)
-    puts @json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]
-    if @json["people"]["#{callerID}"]["#{@surveyNum}"]["1"] == nil
-      puts "not available"
-    else
-      puts @json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]
+#Verify that this is working
+  def getBusName(callerID)
+    puts "GETBUSNAME RUNNING"
+    puts "VERIFY BUS EXISTS: #{@json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]}"
+    @busName = @json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]
+    if @busJson.has_key?(@busName.to_s) == false
+      @busJson["#{@busName}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0, "6" => 0, "7" => 0, "8" => 0, "9" => 0, "10" => 0}
     end
+    puts "END OF BUSNAME"
+    return @busName
   end
 
   def runNew(callerID, userText)
@@ -95,23 +98,22 @@ class Citivan
       if @json["people"].has_key?(callerID.to_s) == true
         puts "VERIFY USER EXISTS: USER ALREADY EXISTS"
 
+        currentConvoNum = @callerHashInfo["convoNum"]
+        puts "CURRENTCONVONUM LENGTH: #{@callerHashInfo.length}"
+        @surveyNum = @callerHashInfo.length-2 #Note: convoNum and noMoreCancel item is removed from length
+        overrideReturnValue = nil
+        @busJson = getDBData("http://citivan.cloudant.com/citivan/busData/")
+
         #Creates new survey hash if last is full
         if @callerHashInfo["convoNum"] > 5 && userText != "back" && userText != "rate" && userText != "cancel"
           puts "CREATING NEW SURVEY HASH. LAST SURVEY IS FULL"
           @json["people"]["#{callerID}"]["convoNum"] = 1
-          @json["people"]["#{callerID}"]["#{callerHashInfo.length}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
-        end
-
-        currentConvoNum = @callerHashInfo["convoNum"]
-        puts "CURRENTCONVONUM LENGTH: #{@callerHashInfo.length}"
-        @surveyNum = @callerHashInfo.length-2 #Note: convoNum and noMoreCancel item is removed from length
-        overrideReturnValue = ""
-        busJson = getDBData("http://citivan.cloudant.com/citivan/busData/")
+          @json["people"]["#{callerID}"]["#{@callerHashInfo.length-1}"] = {"1" => 0, "2" => 0, "3" => 0, "4" => 0, "5" => 0}
 
   ##errors following here:
         ###BACK CMD
         #TODO: Remove info from bus database
-        if userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == false:
+        elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == false:
           puts "BACK FUNCTION SUCCESS"
           if currentConvoNum <= 6 && currentConvoNum > 1
             currentConvoNum -= 1
@@ -131,13 +133,14 @@ class Citivan
         #TODO: Pull info from bus database
         elsif userText == "rate":
           puts "TODO: rate function goes here"
-          deleteBusInfo(callerID)
+          getBusName(callerID)
+          puts "BUSNAME: #{@busName}"
 
         ###EXIT CMD
         #TODO: REMOVE VALUES FROM BUS INFO DATABASE
         elsif userText == "cancel":
           puts "CANCEL FUNCTION: Deleted survey"
-          @json["people"]["#{callerID}"].delete(surveyNum.to_s)
+          @json["people"]["#{callerID}"].delete("#{@surveyNum}")
           #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
           @json["people"]["#{callerID}"]["convoNum"] = 6
           @json["people"]["#{callerID}"]["noMoreCancel"] = true
@@ -145,22 +148,26 @@ class Citivan
         ###INPUT TEXT INTO SURVEY
         #TODO: run error message
         #TODO: error handling if NIL
-        #TODO: put info into the bus database
         #TODO: NEED TO CONSIDER THAT THE ANSWERS WILL BE WORDS
         else
           puts "INPUTTING DATA FUNCTION"
-          #TODO: Verify that the input is appropriate. If not, run error message
           if userText.to_i == 0 && currentConvoNum != 1
             puts "TODO: RUN ERROR MESSAGE"
+            raise "incorrectInput"
           else
             puts "INFO INTO SURVEY SYSTEM"
-            if @json["people"]["#{callerID}"][surveyNum.to_s] == nil
+            if @json["people"]["#{callerID}"]["#{@surveyNum}"] == nil
+              puts "RAISING NIL ERROR BECAUSE I'M THE WORST"
               raise "nilError"
             else
-              @json["people"]["#{callerID}"][surveyNum.to_s][currentConvoNum.to_s] = userText.to_i
+              getBusName(callerID)
+              puts "BUSNAME: #{@busName}"
+              @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = userText.to_i
+              @busJson["#{@busName}"]["#{currentConvoNum}"] += userText.to_i
+              @busJson["#{@busName}"]["#{currentConvoNum +5}"] += 1
               @json["people"]["#{callerID}"]["convoNum"] += 1
+
               @json["people"]["#{callerID}"]["noMoreCancel"] = false
-              puts "TODO: put info into the bus database"
             end
           end
 
@@ -178,12 +185,13 @@ class Citivan
     rescue => nilError
       puts "NIL ERROR"
 
+    rescue => incorrectInput
+      puts "INCORRECT INPUT FOOL"
     #TODO: rescue section. WHAT HAPPENS WHEN TWO SURVEYS HAVE THE SAME NUMBER? CREATE FOR LOOP TO INCREMENT DATA UP
-    #WHAT HAPPENS WHEN A SURVEY ITEM IS INCORRECT? MAKE SURE IT GETS REMOVED AND QUESTION GETS ASKED AGAIN
 
     ensure
       puts "overrideReturnValue: #{overrideReturnValue}"
-      if overrideReturnValue == ""
+      if overrideReturnValue == nil
         ###Note: store information into user database
         returnValue = @json["people"]["#{callerID}"]["convoNum"]
         jsonFormat = @json.to_json
@@ -194,7 +202,6 @@ class Citivan
         returnValue = overrideReturnValue
       end
       puts "RETURNVALUE: #{returnValue}"
-      puts returnValue.class
     return returnValue
     
     end #begin/ensureEnd
@@ -203,11 +210,8 @@ class Citivan
 
 end #citivanServer End
 
-
-#TODO: NEED A WAY TO SEND ERROR MESSAGE TO USERS IF THEIR ANSWER IS NOT INPUTED
-#TODO: DON'T NEED TO SEND WELCOME MESSAGE EVERY SINGLE TIME THE SURVEY STARTS
 def simulateSMS(callerID, initialText)
-  connect = Citivan.new(8583807847)
+  connect = Citivan.new(111222333)
   #This variable will use the users response to give the appropriate answer
   reply = initialText.downcase
   #This variable will correspond to which message should be played
@@ -222,7 +226,8 @@ def simulateSMS(callerID, initialText)
     #wait(3000)
     puts "#{$questions[status-1.to_i]}"
   elsif status.class != Fixnum
-    puts "Sorry, you have entered a wrong choice. Please try again! Reply with \"help\" for a list of commands."
+    puts "#{status}"
+    #Please try again! Reply with \"help\" for a list of commands.
   else #NEED BETTER VERIFICATION SYSTEM FOR YOU CHOSE PART
     puts "You chose #{reply}. #{$questions[status-1.to_i]}"
   end
@@ -265,71 +270,7 @@ end
   "5. Was your minibus clean? Pick 1 or 2. 1) Yes 2) No.", "6. Thank you for your responses! Have a great day."]
 
   ###################Execute code here
-  simulateSMS(8583807847, "rate")
-
-# if currentCall
-#   #This variable will use the users response to give the appropriate answer
-#   reply = currentCall.initialText.downcase!
-#   #This variable will correspond to which message should be played
-#   status = runNew(currentCall.callerID, reply)
-#   puts status
-
-#   if reply == "help"
-#     say "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"exit\" to discard your answers and start over."
-#   elsif status == 1
-#     say "Welcome to CitiVan! Please answer the following questions." #TODO: ADD MORE INFO ABOUT FUNCTIONS
-#     wait(3000)
-#     say "#{questions[status-1.to_i]}"
-#   else #NEED BETTER VERIFICATION SYSTEM FOR YOU CHOSE PART
-#     say "You chose #{reply}. #{questions[status-1.to_i]}"
-
-#   end
-
-#   hangup
-
-
-#   # if $status == 1
-#   #     say "#{messages[$status.to_i]['value']} #{reply}. #{messages[$status.to_i]['message']}"
-  
-#   # #If this is a new user, send the first message out, create the user and start the first session.
-#   # elsif $status == 0
-#   # #This sends the initial message with the first question
-#   #   say "#{messages[$status.to_i]['1']}"
-#   #   wait(3000)
-#   #   say "#{messages[$status.to_i]['message']}"
-#   # else
-#   #   #If the user responds with an answer that does not correspond to my answers,
-#   #   #It will ask the question again
-#   #   if messages[$status.to_i][$reply] == nil 
-#   #     $newStatus = runNew($currentCall.callerID, "back") 
-#   #     say "Sorry, you have entered a wrong choice. #{messages[$newStatus.to_i]['message']}" 
-#   #   else
-#   #     say "#{messages[$status.to_i][$reply]} #{messages[$status.to_i]['message']}"
-#   #   end
-#   # end
-  
-#   # #There is no reason to keep the session alive, so we hangup 
-#   # hangup
- 
-# else  
-#   #Grab the $numToDial parameter and initiate the SMS conversation
-#   event = call(numToDial, {:network => "SMS"})
-   
-#   #This primarily updates the database with the new number. This variable should always be 0.
-#   status = runNew(numToDial, currentCall.initialText)
-  
-#   #This sends the initial message with the first question
-#   say "Welcome to CitiVan! Please answer the following questions."
-#   wait(3000)
-#   say "#{questions[status-1.to_i]}"
-  
-#   #There is no reason to keep the session alive, so we hangup 
-#   hangup
- 
-# end
-
-
-
+  simulateSMS(111222333, "1")
 
 
 

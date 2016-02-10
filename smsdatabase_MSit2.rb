@@ -94,10 +94,7 @@ class Citivan
   end
 
   def calculateAverage(questionNum)
-    for i in 2..5
-      puts "i: #{i}"
-      avg = (@busJson["#{@busName}"]["#{i}"])/(@busJson["#{@busName}"]["#{i +5}"])
-      puts "AVG: #{avg}"
+    return avg = (@busJson["#{@busName}"]["#{questionNum}"])/(@busJson["#{@busName}"]["#{questionNum +5}"])
   end
 
   def runNew(callerID, userText)
@@ -140,25 +137,25 @@ class Citivan
           puts "BACK FUNCTION: overrideReturnValue activated"
           overrideReturnValue = "Sorry, you cannot go back. Please start a new survey by sending another message."
 
+        #fin
         ###RATE CMD
-        #TODO: Pull info from bus database
         elsif userText == "rate"
-          puts "TODO: rate function goes here"
-          #getBusName(callerID, userText)
+          puts "RATE FUNCTION"
           puts "BUSNAME: #{@busName}"
           if @busJson["#{@busName}"].has_value?(0)
             puts "BUS HAS NOT BEEN RATED YET"
             overrideReturnValue = "This bus has not been rated yet."
           else
             puts "BUS RATING IS THE FOLLOWING"
-
-            overrideReturnValue = "#{@busName}: Question1: #{}"
+            overrideReturnValue = "#{@busName} rating:\n"\
+            "Quality of ride: #{calculateAverage(2)}\n"\
+            "Speeding: #{calculateAverage(3)}\nCourteous: "\
+            "#{calculateAverage(4)}\n"\
+            "Clean: #{calculateAverage(5)}"
           end
 
-        #fin
         ###CANCEL CMD
         elsif userText == "cancel"
-          #getBusName(callerID, userText)
           puts "CANCEL FUNCTION: Deleted survey"
           @json["people"]["#{callerID}"].delete("#{@surveyNum}")
           #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
@@ -184,7 +181,6 @@ class Citivan
               puts "RAISING NIL ERROR BECAUSE I'M THE WORST"
               raise "nilError"
             else
-              #getBusName(callerID, userText)
               puts "BUSNAME: #{@busName}"
               puts "#{@json["people"]["#{callerID}"]["convoNum"]}"
               if @json["people"]["#{callerID}"]["convoNum"] == 1
@@ -277,7 +273,7 @@ end
   "5. Was your minibus clean? Pick 1 or 2. 1) Yes 2) No.", "6. Thank you for your responses! Have a great day."]
 
   ###################Execute code here
-  simulateSMS(111222333, "cancel")
+  simulateSMS(111222333, "rate")
 
 
 

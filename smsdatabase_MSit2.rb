@@ -79,7 +79,6 @@ class Citivan
 
   def getBusName(callerID, userText)
     puts "GETBUSNAME RUNNING"
-    #puts "VERIFY BUS EXISTS: #{@json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]}"
     @busName = @json["people"]["#{callerID}"]["#{@surveyNum}"]["1"]
     puts "BUSNAME: #{@busName}"
     if @busName.to_s == "0"
@@ -93,8 +92,8 @@ class Citivan
     return @busName
   end
 
-  def calculateAverage(questionNum)
-    return avg = (@busJson["#{@busName}"]["#{questionNum}"])/(@busJson["#{@busName}"]["#{questionNum +5}"])
+  def calculateAverage(questionNum) #Have it return a float number instead of an integer
+    return avg = (@busJson["#{@busName}"]["#{questionNum}"].to_f)/(@busJson["#{@busName}"]["#{questionNum +5}"])
   end
 
   def runNew(callerID, userText)
@@ -274,31 +273,31 @@ class Citivan
 
 end #citivanServer End
 
-def simulateSMS(callerID, initialText)
-  connect = Citivan.new(callerID)
-  #This variable will use the users response to give the appropriate answer
-  reply = initialText.downcase
-  #This variable will correspond to which message should be played
-  status = connect.runNew(callerID, reply)
-  puts "class: #{status.class}"
+# def simulateSMS(callerID, initialText)
+#   connect = Citivan.new(callerID)
+#   #This variable will use the users response to give the appropriate answer
+#   reply = initialText.downcase
+#   #This variable will correspond to which message should be played
+#   status = connect.runNew(callerID, reply)
+#   puts "class: #{status.class}"
 
-  if reply == "help"
-    puts "TEXT MESSAGE BACK"
-    puts "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"cancel\" to discard your survey."
-  elsif status.class != String && status.to_i <= 1
-    puts "TEXT MESSAGE BACK"
-    puts "Welcome to CitiVan! Please answer the following questions." #TODO: ADD MORE INFO ABOUT FUNCTIONS
-    #wait(3000)
-    puts "#{$questions[0]}"
-  elsif status.class != Fixnum
-    puts "TEXT MESSAGE BACK"
-    puts "#{status}"
-  else
-    puts "TEXT MESSAGE BACK"
-    puts "You chose #{reply}. #{$questions[status-1.to_i]}"
-  end
+#   if reply == "help"
+#     puts "TEXT MESSAGE BACK"
+#     puts "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"cancel\" to discard your survey."
+#   elsif status.class != String && status.to_i <= 1
+#     puts "TEXT MESSAGE BACK"
+#     puts "Welcome to CitiVan! Please answer the following questions. Reply with \"help\" for more options."
+#     #wait(3000)
+#     puts "#{$questions[0]}"
+#   elsif status.class != Fixnum
+#     puts "TEXT MESSAGE BACK"
+#     puts "#{status}"
+#   else
+#     puts "TEXT MESSAGE BACK"
+#     puts "You chose #{reply}. #{$questions[status-1.to_i]}"
+#   end
 
-end
+# end
 
 
 ############### Main method starts here:
@@ -313,13 +312,48 @@ $questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to ra
 # puts "Welcome. What is your callerID?"
 # caller = gets.chomp!
 
-continue = true
-while continue == true
-  puts "What is your message?"
-  input = gets.chomp!
-  if input == "stop"
-    break
-  else
-    simulateSMS(8583807847, input)
-  end
+# continue = true
+# while continue == true
+#   puts "What is your message?"
+#   input = gets.chomp!
+#   if input == "stop"
+#     break
+#   else
+#     simulateSMS(8583807847, input)
+#   end
+# end
+
+
+#TODO: NEED TO GET THIS TO WORK ON ACTUAL PHONE SMS. APP WON'T SEND "HI THIS IS 1"
+
+#Grab the $numToDial parameter and initiate the SMS conversation
+log "----------------------------------------------------starting texts"
+say "Hi I got something!"
+say "Message 2"
+#$numToDial = +1339-204-4253
+call($numToDial, {:network => "SMS"})
+log "----------------------------------------------------call has processed"
+say "Hi this is 1"
+connect = Citivan.new($numToDial)
+say "Hi this is 2"
+#This variable will use the users response to give the appropriate answer
+reply = $numToDial.initialText.downcase
+say "3"
+say "reply #{reply}"
+#This variable will correspond to which message should be played
+status = connect.runNew($numToDial.callerID, reply)
+say "#{status}"
+
+if reply == "help"
+  say "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"cancel\" to discard your survey."
+elsif status.class != String && status.to_i <= 1
+  say "Welcome to CitiVan! Please answer the following questions. Reply with \"help\" for more options."
+  wait(3000)
+  say "#{$questions[0]}"
+elsif status.class != Fixnum
+  say "#{status}"
+else
+  say "You chose #{reply}. #{$questions[status-1.to_i]}"
 end
+
+hangup

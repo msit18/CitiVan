@@ -92,7 +92,7 @@ class Citivan
     return @busName
   end
 
-  def calculateAverage(questionNum) #Have it return a float number instead of an integer
+  def calculateAverage(questionNum)
     return avg = (@busJson["#{@busName}"]["#{questionNum}"].to_f)/(@busJson["#{@busName}"]["#{questionNum +5}"])
   end
 
@@ -203,7 +203,9 @@ class Citivan
             puts currentConvoNum
             if userText.to_i == 0 && currentConvoNum != 1
               puts "INCORRECT ANSWER FORMAT"
+              #FIX: IF THEY SAY YES OR NO, PROMPT THEM TO PUT IN THE NUMBER INSTEAD put in the correct number if they do
               overrideReturnValue = "Sorry, you have entered a wrong choice. Please try again! Reply with \"help\" for options."
+            #elsif if it's a different number, limit their answers to either 1 or 2
             else
               puts "INFO INTO SURVEY SYSTEM"
               if @json["people"]["#{callerID}"]["#{@surveyNum}"] == nil
@@ -302,6 +304,8 @@ end #citivanServer End
 
 ############### Main method starts here:
 
+
+#FIX: NO QUESTION NUMBERS
 #Text messages to send to user
 $questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
 "3. Was your driver speeding? Pick 1 or 2. 1) Yes 2) No.", "4. Was your driver courteous? Pick 1 or 2. 1) Yes 2) No.",
@@ -324,25 +328,25 @@ $questions = ["1. What is your bus number?", "2. Pick a number from 1 to 5 to ra
 # end
 
 
-#TODO: NEED TO GET THIS TO WORK ON ACTUAL PHONE SMS. APP WON'T SEND "HI THIS IS 1"
+#FIX: SOMETIMES FREEZES....?
+#FIX: OR REPLY WITH HELP
+#FIX: REPEAT THE QUESTION AFTER THE ERROR THING HAPPENS
+#FIX: IF CANCEL AND DONOTCANCEL IS TRUE, THEN DO NOT SEND THE ERROR MESSAGE. FIX IT SOMEHOW
+#FIX: IF YOU CANCEL, IT RESTARTS AUTOMATICALLY?
+#FIX: IF IT SAYS YOU CANNOT DELETE THIS SURVEY, PLEAE CONTINUE WITH SURVEY, SEND QUESTION INSTEAD. NOT ERROR MESSAGE
+
 
 #Grab the $numToDial parameter and initiate the SMS conversation
-log "----------------------------------------------------starting texts"
-say "Hi I got something!"
-say "Message 2"
-#$numToDial = +1339-204-4253
-call($numToDial, {:network => "SMS"})
-log "----------------------------------------------------call has processed"
-say "Hi this is 1"
-connect = Citivan.new($numToDial)
-say "Hi this is 2"
+log "I HAVE LOGGED THIS MESSAGE"
+log "THIS IS THE CURRENT CALLER ID: #{$currentCall.callerID} ---------------------"
+log "THIS IS THE CURRENT MESSAGE I RECIEVED: #{$currentCall.initialText} -----------------"
+call "+13392044253", { :network => "SMS"}
+connect = Citivan.new($currentCall.callerID.to_s)
 #This variable will use the users response to give the appropriate answer
-reply = $numToDial.initialText.downcase
-say "3"
-say "reply #{reply}"
+log "THIS IS THE CURRENT CALL AFTER CONNECT: #{$currentCall.initialText.downcase}"
+reply = $currentCall.initialText.downcase
 #This variable will correspond to which message should be played
-status = connect.runNew($numToDial.callerID, reply)
-say "#{status}"
+status = connect.runNew($currentCall.callerID.to_s, reply)
 
 if reply == "help"
   say "Send \"back\" to go back a question. Send \"rate VanNumber\" to see the ratings of that van. Send \"cancel\" to discard your survey."

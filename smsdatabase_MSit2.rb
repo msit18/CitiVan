@@ -120,32 +120,32 @@ class Citivan
           overrideReturnValue = nil
 
   ###BACK CMD
-          if userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == false
-            puts "BACK FUNCTION SUCCESS"
-            if currentConvoNum <= 6 && currentConvoNum > 1
-              getBusName(callerID, userText)
-              puts "Previous message sent"
-              currentConvoNum -= 1
-              @json["people"]["#{callerID}"]["convoNum"] -= 1
-              @busJson["#{@busName}"]["#{currentConvoNum +5}"] -= 1
-              #Note: Removes values from json and busJson
-              if @json["people"]["#{callerID}"]["convoNum"] == 1
-                puts "REMOVE BUS NAME and INCORRECT BUS"
-                @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = 0
-                @busJson.delete("#{@busName}")
-              else
-                puts "REMOVE LAST VALUE"
-                @busJson["#{@busName}"]["#{currentConvoNum}"] -= @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"]
-                @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = 0
-              end
-            else
-              @json["people"]["#{callerID}"]["convoNum"] = 1
-              puts "Welcome message sent"
-            end
+          # if userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == false
+          #   puts "BACK FUNCTION SUCCESS"
+          #   if currentConvoNum <= 6 && currentConvoNum > 1
+          #     getBusName(callerID, userText)
+          #     puts "Previous message sent"
+          #     currentConvoNum -= 1
+          #     @json["people"]["#{callerID}"]["convoNum"] -= 1
+          #     @busJson["#{@busName}"]["#{currentConvoNum +5}"] -= 1
+          #     #Note: Removes values from json and busJson
+          #     if @json["people"]["#{callerID}"]["convoNum"] == 1
+          #       puts "REMOVE BUS NAME and INCORRECT BUS"
+          #       @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = 0
+          #       @busJson.delete("#{@busName}")
+          #     else
+          #       puts "REMOVE LAST VALUE"
+          #       @busJson["#{@busName}"]["#{currentConvoNum}"] -= @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"]
+          #       @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{currentConvoNum}"] = 0
+          #     end
+          #   else
+          #     @json["people"]["#{callerID}"]["convoNum"] = 1
+          #     puts "Welcome message sent"
+          #   end
 
-          elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == true
-            puts "BACK FUNCTION: overrideReturnValue activated"
-            overrideReturnValue = "Sorry, you cannot go back. Please start a new survey by sending another message."
+          # elsif userText == "back" && @json["people"]["#{callerID}"]["noMoreCancel"] == true
+          #   puts "BACK FUNCTION: overrideReturnValue activated"
+          #   overrideReturnValue = "Sorry, you cannot go back. Please start a new survey by sending another message."
 
   ###RATE CMD
           elsif userText == "rate"
@@ -165,35 +165,35 @@ class Citivan
             end
 
   ###CANCEL CMD
-          elsif userText == "cancel"
-            puts "CANCEL FUNCTION: Deleted survey"
-            if @json["people"]["#{callerID}"]["noMoreCancel"] == false
-              getBusName(callerID, userText)
-              puts "convoNum #{@json["people"]["#{callerID}"]["convoNum"]}"
-              #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
-              @json["people"]["#{callerID}"]["convoNum"] = 6
-              @json["people"]["#{callerID}"]["noMoreCancel"] = true
-              puts "jsons are fine"
-              puts @busJson.keys
-              puts @busJson.has_key?("#{@busName}")
-              if @busJson.has_key?("#{@busName}") == true
-                puts "busJson has key"
-                @busJson["#{@busName}"]["6"] -= 1
-                puts "before for loop"
-                for i in 2..5
-                  puts "inside for loop"
-                  @busJson["#{@busName}"]["#{i}"] -= @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{i}"]
-                  @busJson["#{@busName}"]["#{i +5}"] -= 1
-                end
-              end
-              puts "SurveyNum = #{@surveyNum}"
-              @json["people"]["#{callerID}"].delete("#{@surveyNum}")
-              puts "finished with for loops"
-              byPassOverrideReturnValue = true
-              overrideReturnValue = "Survey has been discarded. Thanks!"
-            else
-              overrideReturnValue = "Sorry, you cannot delete this survey. Please continue this survey."
-            end
+          # elsif userText == "cancel"
+          #   puts "CANCEL FUNCTION: Deleted survey"
+          #   if @json["people"]["#{callerID}"]["noMoreCancel"] == false
+          #     getBusName(callerID, userText)
+          #     puts "convoNum #{@json["people"]["#{callerID}"]["convoNum"]}"
+          #     #Note: sets convoNum to 6 so a new survey can be created next time the user inputs
+          #     @json["people"]["#{callerID}"]["convoNum"] = 6
+          #     @json["people"]["#{callerID}"]["noMoreCancel"] = true
+          #     puts "jsons are fine"
+          #     puts @busJson.keys
+          #     puts @busJson.has_key?("#{@busName}")
+          #     if @busJson.has_key?("#{@busName}") == true
+          #       puts "busJson has key"
+          #       @busJson["#{@busName}"]["6"] -= 1
+          #       puts "before for loop"
+          #       for i in 2..5
+          #         puts "inside for loop"
+          #         @busJson["#{@busName}"]["#{i}"] -= @json["people"]["#{callerID}"]["#{@surveyNum}"]["#{i}"]
+          #         @busJson["#{@busName}"]["#{i +5}"] -= 1
+          #       end
+          #     end
+          #     puts "SurveyNum = #{@surveyNum}"
+          #     @json["people"]["#{callerID}"].delete("#{@surveyNum}")
+          #     puts "finished with for loops"
+          #     byPassOverrideReturnValue = true
+          #     overrideReturnValue = "Survey has been discarded. Thanks!"
+          #   else
+          #     overrideReturnValue = "Sorry, you cannot delete this survey. Please continue this survey."
+          #   end
 
   ###INPUT TEXT INTO SURVEY
           #TODO: error handling if NIL

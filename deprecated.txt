@@ -1,0 +1,78 @@
+///////////////////MAPS///////////////////
+public void putAlerts(JSONArray markers){
+		
+		try{
+			for (int i = 0; i < markers.length(); i++){
+				JSONArray marker = markers.getJSONArray(i);
+				String markerType = marker.getString(0);
+				LatLng latLng = new LatLng(marker.getDouble(1), marker.getDouble(2));
+				
+				mClusterManager.addItem(
+						new Alert(latLng, markerType, alertDrawables.get(markerType)));
+			}
+			mClusterManager.cluster();
+		} catch (JSONException e){
+			e.printStackTrace();
+		}
+}
+
+
+/////////////////////////////////////////////////
+
+/*private class AlertRenderer extends DefaultClusterRenderer<Alert> implements GoogleMap.OnCameraChangeListener{
+		private final IconGenerator mIconGenerator = new IconGenerator(getApplicationContext());
+		private final ImageView mImageView;
+		public AlertRenderer() {
+			super(getApplicationContext(), googleMap, mClusterManager);
+			mImageView = new ImageView(getApplicationContext());
+	        int dpi = getResources().getDisplayMetrics().densityDpi;
+	        int dp = 30;//we want dp by dp images
+			mImageView.setLayoutParams(new ViewGroup.LayoutParams(dp * dpi/ 160, dp * dpi/ 160));
+			mIconGenerator.setContentView(mImageView);
+		}
+		
+		@Override
+		protected void onBeforeClusterItemRendered(Alert alert, MarkerOptions markerOptions){
+			mImageView.setImageResource(alert.alertImage);
+			Bitmap icon = mIconGenerator.makeIcon();
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon));
+		}
+		
+		@Override
+        protected boolean shouldRenderAsCluster(Cluster cluster) {
+            // Always render clusters.
+            return cluster.getSize() > 1;
+        }
+
+		@Override
+		public void onCameraChange(CameraPosition arg) {
+			//This makes sure that we do not access markers until we have location data
+			//Initial zoom level is high which can add pressure on the server when accessing many markers
+			if (vehicleLocation == null){
+				return;
+			}
+			
+			Display display = getWindowManager().getDefaultDisplay();
+			int width = display.getWidth();
+			int height = display.getHeight();
+			LatLng topLeft = googleMap.getProjection().fromScreenLocation(new Point(0, 0));
+			LatLng topRight = googleMap.getProjection().fromScreenLocation(new Point(width, 0));
+			LatLng bottomLeft = googleMap.getProjection().fromScreenLocation(new Point(0, height));
+			LatLng bottomRight = googleMap.getProjection().fromScreenLocation(new Point(width, height));
+			MarkerProcessor markerProcessor = new MarkerProcessor(MapActivity.this);
+			String url = getSharedPreferences("com.example.citivan.serverAddress",
+					Context.MODE_PRIVATE).getString("serverAddress", "none");
+			String[] input = new String[]{url,
+					topLeft.latitude + "",
+					topLeft.longitude + "",
+					topRight.latitude + "",
+					topRight.longitude + "",
+					bottomLeft.latitude + "",
+					bottomLeft.longitude + "",
+					bottomRight.latitude + "",
+					bottomRight.longitude + ""};
+			markerProcessor.execute(input);
+		}
+	}*/
+	
+	

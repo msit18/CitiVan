@@ -1,0 +1,14 @@
+[Add compounded score from the server]
+
+[Alert the driver that he has gone off his designated route]
+
+[Add car density from server]
+	
+Display more information on the markers
+
+Send data to server when we log out
+
+*-Make sure that we can stop the application from authentication
+
+*-Beautify the dialogs(icons)
+

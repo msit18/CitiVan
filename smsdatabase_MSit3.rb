@@ -222,7 +222,7 @@ def simulateSMS(callerID, initialText)
   puts "TEXT BACK"
 
   if status.class != String && status.to_i <= 1
-    puts "Welcome to CitiVan! Please answer the following questions. To see the ratings of a van, send \"rate VanNumber\""
+    puts "Welcome to CitiVan! Please answer the following questions. To see the ratings of a van, send: \"RATE (insert VanNumber)\""
     #wait(3000)
     puts "#{$questions[0]}"
   elsif status.class != Fixnum

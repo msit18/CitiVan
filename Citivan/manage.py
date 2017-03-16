@@ -1,8 +1,9 @@
 import os
 from flask import Flask
 from flask import request
+from Citivan import app
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
 @app.route('/')
 def hello_world():

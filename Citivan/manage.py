@@ -1,5 +1,5 @@
-import os
-from flask import Flask
+# import os
+# from flask import Flask
 from flask import request
 from Citivan import app
 

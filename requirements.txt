@@ -1,9 +1,10 @@
 appdirs==1.4.3
+cloudant==2.4.0
+Flask==0.8
+gunicorn==0.14.2
+Jinja2==2.6
 packaging==16.8
 pyparsing==2.2.0
+requests==2.13.0
 six==1.10.0
-
-Flask==0.8
-Jinja2==2.6
 Werkzeug==0.8.3
-gunicorn==0.14.2

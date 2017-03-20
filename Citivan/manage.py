@@ -18,7 +18,7 @@ def login():
 		print "KEYS: ",searchword
 		print "MESSAGE: ", messageVal
 		print "Cellphone Number: {0}\nMessage: {1}".format(searchword, messageVal)
-		if (searchword != "") & (messageVal != ""):
+		if (searchword != "") & (messageVal != "") & (searchword != "none") & (messageVal!= "none"):
 			returnVal = analyzeSMSInfo(searchword, messageVal)
 		else:
 			returnVal = "Empty credentials"

@@ -35,8 +35,8 @@ class Server:
 						" To see the ratings of a van, send \"rate VanNumber\"\n{0}"\
 						.format(cf.questions[0])
 		elif isinstance(status, int)==False:
-			print "splitMsg : ", splitMsg
 			splitMsg = status.split("@@")
+			print "splitMsg : ", splitMsg
 			sendBack = "{0}\n{1}".format(splitMsg[0], splitMsg[1])
 		else:
 			sendBack = cf.questions[status-1]

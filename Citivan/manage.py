@@ -13,18 +13,19 @@ def login():
 	if request.method == 'GET':
 		return "Get method: Hello, World from SCL!"
 	elif request.method == 'PUT':
-		searchword = request.args.get('cellphoneNum')
+		cellNum = request.args.get('cellphoneNum')
 		messageVal = request.args.get('message')
-		print "KEYS: ",searchword
+		print "KEYS: ",cellNum
 		print "MESSAGE: ", messageVal
-		print "RUN CHECKS: "
-		print "searchword == None: ", (searchword == "None")
-		print "searchword == Null: ", searchword == ""
-		print "Cellphone Number: {0}\nMessage: {1}".format(searchword, messageVal)
-		if (searchword != "") & (messageVal != "") & (searchword != "none") & (messageVal!= "none"):
-			returnVal = analyzeSMSInfo(searchword, messageVal)
+		# logs = "Cellphone Number: {0}\nMessage: {1}".format(cellNum, messageVal)
+		if (str(cellNum) != "None") & (str(messageVal) != "None"):
+			returnVal = analyzeSMSInfo(cellNum, messageVal)
+		elif (str(cellNum) == "None"):
+			returnVal = "Sorry, there was an error with recording your cellphone number. Please try again."
+		elif (str(messageVal) == "None"):
+			returnVal = "Sorry, there was an error with the message you sent. Please try again."
 		else:
-			returnVal = "Empty credentials"
+			returnVal = "Sorry, there was an error with the message and cellphone number. Please try again!"
 		print "RETURN VAL: ", returnVal
 		return returnVal
 	else:

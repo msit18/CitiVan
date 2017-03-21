@@ -11,6 +11,8 @@
 #Everything in the json starts from 1 instead of 0. This is to improve readability for
 #non-computer science people.
 
+#FIX: EMPTY MESSAGES BEING SENT TO HEROKU WEBSITE
+
 from __future__ import division
 from cloudant.client import Cloudant
 from cloudant.result import Result, ResultByKey

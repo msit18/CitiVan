@@ -22,4 +22,4 @@ from analyzeSMSResponses import Server
 # 	print "END OF CELLPHONE TEXT"
 
 s = Server()
-s.main("123456", "hello'")
+s.main("123456", "rate newb")

@@ -34,6 +34,7 @@ class Server:
 						" To see the ratings of a van, send \"rate VanNumber\"\n{0}"\
 						.format(cf.questions[0])
 		elif isinstance(status, int)==False:
+			print "splitMsg : ", splitMsg
 			splitMsg = status.split("@@")
 			sendBack = "{0}\n{1}".format(splitMsg[0], splitMsg[1])
 		else:
@@ -100,7 +101,7 @@ class CitivanSMS:
 				return overrideReturnValue
 			except:
 				print "There was an error in bus data"
-				return "The bus {0} has not been rated yet.\n{1}".format(rateBusName, cf.questions[currentConvoNum-1])
+				return "The bus {0} has not been rated yet. @@{1}".format(rateBusName, cf.questions[currentConvoNum-1])
 
 	def getBusName(self, userText, surveyNum):
 		print "getBusName Method"
@@ -140,7 +141,7 @@ class CitivanSMS:
 			if 3<len(userText)<5:
 				print "BUSNAME IS FOUR CHARACTERS"
 				self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = userText
-				self.busJson[_busName][str(currentConvoNum+6)] += 1
+				self.busJson[_busName][7] += 1
 				self.json[self.callerID]["convoNum"] += 1
 				self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 		elif (2<=currentConvoNum<=3) & (1<=intUserText<=5):

@@ -115,7 +115,7 @@ class CitivanSMS:
 			if (str(busName) not in self.busJson) & (str(userText) != "rate"):
 				print "CREATING NEW BUS DATA"
 				self.busJson[str(busName)] = {"1":"{0}".format(userText), "2":0, "3":0, "4":0, "5":0, "6":0,
-										"7":0, "8":0, "9":0, "10":0, "11":0, "12":0}
+										"7":1, "8":0, "9":0, "10":0, "11":0, "12":0}
 				busJsonFormat = self.busJson
 				end_point_bus = "{0}/citivan/{1}/".format(cf.serviceURL, "busData")
 				r_bus = self.client.r_session.put(end_point_bus, json=busJsonFormat)
@@ -142,7 +142,7 @@ class CitivanSMS:
 			if 3<len(userText)<5:
 				print "BUSNAME IS FOUR CHARACTERS"
 				self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = userText
-				self.busJson[_busName]["7"] += 1
+				# self.busJson[_busName]["7"] += 1
 				self.json[self.callerID]["convoNum"] += 1
 				self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 		elif (2<=currentConvoNum<=3) & (1<=intUserText<=5):

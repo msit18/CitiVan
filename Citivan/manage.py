@@ -18,7 +18,7 @@ def login():
 		print "KEYS: ",cellNum
 		print "MESSAGE: ", messageVal
 		# logs = "Cellphone Number: {0}\nMessage: {1}".format(cellNum, messageVal)
-		if (str(cellNum) != "None") & (str(messageVal) != "None"):
+		if (str(cellNum) != "None") & (str(messageVal) != "None") :
 			returnVal = analyzeSMSInfo(cellNum, messageVal)
 		elif (str(cellNum) == "None"):
 			returnVal = "Sorry, there was an error with recording your cellphone number. Please try again."

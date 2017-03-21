@@ -27,6 +27,7 @@ class Server:
 		text = str(participantMsg)
 		c = CitivanSMS(caller, cf.client)
 		status = c.runNew(text.lower())
+		print "status: ", status
 		print "STATUS TYPE: ", type(status)
 		print "\n\nCELLPHONE TEXT: "
 		if status <= 1:

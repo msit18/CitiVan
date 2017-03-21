@@ -142,7 +142,7 @@ class CitivanSMS:
 			if 3<len(userText)<5:
 				print "BUSNAME IS FOUR CHARACTERS"
 				self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = userText
-				self.busJson[_busName][7] += 1
+				self.busJson[_busName]["7"] += 1
 				self.json[self.callerID]["convoNum"] += 1
 				self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 		elif (2<=currentConvoNum<=3) & (1<=intUserText<=5):

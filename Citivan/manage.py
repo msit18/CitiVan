@@ -76,7 +76,7 @@ def start():
 
 		#what format does this need to be returned as? XML?
 
-		return str(returnVal)
+		return returnVal
 
 	else:
 		return "This page does not exist!"

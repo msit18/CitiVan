@@ -70,7 +70,8 @@ def start():
 		print "Parse: ", contentSplit
 		print "1: ", contentSplit[0]
 
-		returnVal = analyzeSMSInfo(cellNumber, contentSplit[0])
+		# returnVal = analyzeSMSInfo(cellNumber, contentSplit[0])
+		returnVal = analyzeSMSInfo(cellNumber, content)
 		print "returnVal: ", returnVal
 		print type(returnVal)
 

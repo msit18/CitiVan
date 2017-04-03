@@ -15,7 +15,7 @@ def hello_world():
 
 @app.route('/exchange', methods=['GET', 'POST'])
 def login():
-	before_request_exchange()
+	# before_request_exchange()
 	if request.method == 'GET':
 		print "that was a get method"
 		return "Get method: Hello, World from SCL!"
@@ -38,13 +38,13 @@ def login():
 	else:
 		return "This page does not exist!"
 
-def before_request_exchange():
-    if True:
-        print "HEADERS", request.headers
-        print "REQ_path", request.path
-        print "ARGS",request.args
-        print "DATA",request.data
-        print "FORM",request.form
+# def before_request_exchange():
+#     if True:
+#         print "HEADERS", request.headers
+#         print "REQ_path", request.path
+#         print "ARGS",request.args
+#         print "DATA",request.data
+#         print "FORM",request.form
 
 @app.route('/xmlPage', methods=['GET', 'POST'])
 def start():

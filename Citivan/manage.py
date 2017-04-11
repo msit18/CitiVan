@@ -1,6 +1,7 @@
 from flask import request, Response
 from Citivan import app
 import xmltodict
+import requests
 
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
@@ -15,7 +16,6 @@ def hello_world():
 
 @app.route('/exchange', methods=['GET', 'POST'])
 def login():
-	# before_request_exchange()
 	if request.method == 'GET':
 		print "that was a get method"
 		return "Get method: Hello, World from SCL!"
@@ -38,13 +38,6 @@ def login():
 	else:
 		return "This page does not exist!"
 
-# def before_request_exchange():
-#     if True:
-#         print "HEADERS", request.headers
-#         print "REQ_path", request.path
-#         print "ARGS",request.args
-#         print "DATA",request.data
-#         print "FORM",request.form
 
 @app.route('/xmlPage', methods=['GET', 'POST'])
 def start():
@@ -58,26 +51,56 @@ def start():
 		print "DATA",request.data
 		print "FORM",request.form
 		print "DATA ARGS: ", type(request.data)
-		obj = xmltodict.parse(request.data)['gviSms']
-		cellNumber = obj['cellNumber']
-		content = obj['content']
-		contentSplit = content[8:].split(']')
+		if 'gviSms' in xmltodict.parse(request.data):
+			obj = xmltodict.parse(request.data)['gviSms']
+			cellNumber = obj['cellNumber']
+			content = obj['content']
+			contentSplit = content[8:].split(']')
 
-		print "TYPE: ", type(obj)
-		print "OBJ: ", cellNumber
-		print "MESSAGE: ", content
+			print "TYPE: ", type(obj)
+			print "OBJ: ", cellNumber
+			print "MESSAGE: ", content
 
-		print "Parse: ", contentSplit
-		print "1: ", contentSplit[0]
+			print "Parse: ", contentSplit
+			print "Sent Message: ", contentSplit[0]
 
-		# returnVal = analyzeSMSInfo(cellNumber, contentSplit[0])
-		returnVal = analyzeSMSInfo(cellNumber, content)
-		print "returnVal: ", returnVal
-		print type(returnVal)
+			returnVal = analyzeSMSInfo(cellNumber, content)
+			print "returnVal: ", returnVal
+			print type(returnVal)
 
-		#what format does this need to be returned as? XML?
+			#post the xml data to their server
 
-		return returnVal
+			xmlMessage = \
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
+				"<gviSmsMessage>"\
+				    "<affiliateCode>CIT003-485</affiliateCode>"\
+				    "<authenticationCode>19070017</authenticationCode>"\
+				    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
+				    "<messageType>text</messageType>"\
+				    "<recipientList>"\
+				        "<message>{0}</message>"\
+				        "<recipient>"\
+				            "<msisdn>{1}</msisdn>"\
+				        "</recipient>"\
+				    "</recipientList>"\
+				"</gviSmsMessage>".format(returnVal, cellNumber)
+
+			print xmlMessage
+
+			headers = {'Content-Type': 'application/xml'}
+			r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
+			print "Status code: ", r.status_code
+			#post back to server
+
+			return "Response received"
+
+		elif 'responseType' in xmltodict.parse(request.data)['gviSmsResponse'] :
+			print "Response text. No needed effort unless error or reply"
+			return "Thank you for the response message."
+			#what to do if error or reply messagae? Error handling...
+		else:
+			print "KEYS: ", xmltodict.parse(request.data).keys()
+			return "Sorry, we could not handle that request"
 
 	else:
 		return "This page does not exist!"

@@ -1,14 +1,14 @@
 from flask import request, Response
-from Citivan import app
+# from Citivan import app
 import xmltodict
 import requests
 
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
 
-# from flask import Flask
-# import os
-# app = Flask(__name__)
+from flask import Flask
+import os
+app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
@@ -92,9 +92,38 @@ def start():
 			print "Status code: ", r.status_code
 			#post back to server
 
-			return "Response received"
+			return "Response received" #Is this sent back as a POST or what kind of message?
 
-		elif 'responseType' in xmltodict.parse(request.data)['gviSmsResponse'] :
+		elif 'reply' in xmltodict.parse(request.data)['gviSmsResponse']['responseType']:
+			responseText = xmltodict.parse(request.data)['gviSmsResponse']
+			replyMsg = responseText['response']
+			cellphoneNum = responseText['recipient']['msisdn']
+			print "REPLY MESSAGE", replyMsg
+			print "CELLNUM: ", cellphoneNum
+			returnReply = analyzeSMSInfo(cellphoneNum, replyMsg)
+			print "returnReply: ", returnReply
+
+			xmlReplyMessage = \
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
+				"<gviSmsMessage>"\
+				    "<affiliateCode>CIT003-485</affiliateCode>"\
+				    "<authenticationCode>19070017</authenticationCode>"\
+				    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
+				    "<messageType>text</messageType>"\
+				    "<recipientList>"\
+				        "<message>{0}</message>"\
+				        "<recipient>"\
+				            "<msisdn>{1}</msisdn>"\
+				        "</recipient>"\
+				    "</recipientList>"\
+				"</gviSmsMessage>".format(returnReply, cellphoneNum)
+
+			print "replyXMLMSG: ", xmlReplyMessage
+
+			headers = {'Content-Type': 'application/xml'}
+			r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
+			print "Status code: ", r.status_code
+
 			print "Response text. No needed effort unless error or reply"
 			return "Thank you for the response message."
 			#what to do if error or reply messagae? Error handling...
@@ -110,6 +139,6 @@ def analyzeSMSInfo(ID, msg):
 	return s.main(ID, msg)
 
 
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", 5000))
-#     app.run(host='0.0.0.0', port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)

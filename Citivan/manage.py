@@ -5,7 +5,7 @@ import requests
 
 import json
 
-from bs4 import BeautifulSoup
+from BeautifulSoup import BeautifulSoup
 
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server

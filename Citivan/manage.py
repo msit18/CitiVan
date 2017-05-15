@@ -55,6 +55,10 @@ def start():
 		print "Request keys: ", request.form.keys()
 		print "Request items: ", request.form.items()
 
+		JsonData = request.get_json()
+		print "Json data: ", JsonData
+		print "JsonData gvisms: ", JsonData['gviSms']
+
 		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):
 			print "GVISMS IF STATEMENT"

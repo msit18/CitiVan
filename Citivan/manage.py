@@ -6,8 +6,9 @@ import requests
 import json
 
 from bs4 import BeautifulSoup
+from html.parser import HTMLParser
 
-from analyzeSMSResponses import CitivanSMS
+# from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
 
 # from flask import Flask
@@ -58,18 +59,23 @@ def start():
 		print "Request Form: ", request.form.getlist('gviSms')
 		print "Request keys: ", request.form.keys()
 		print "Request items: ", request.form.items()
-
 		print "XML all: ", request.form['XML']
 
 		split = request.form['XML'].split('\n')
 		print "Split: ", split[0]
 		print "Split2: ", split[1]
-
-		testSoup = BeautifulSoup("stringstringstring")
-		print "testsoup: ", testSoup
-		# print "JSON Dumps: ", json.dumps(split[1])
-		soup = BeautifulSoup(split[1])
+		soup = BeautifulSoup(split[1], "html.parser")
 		print "Soup: ", soup
+		soupContent = soup.find('content')
+		print "content tag: ", soupContent
+
+		content_split = soupContent.split('>')
+		print "content_split"
+
+
+		parser = MyHTMLParser()
+		parser.feed(request.form['XML'])
+		print "end of parser"
 
 
 		print "True or false: ", ('gviSms' in request.form)
@@ -266,6 +272,18 @@ def analyzeSMSInfo(ID, msg):
 	s = Server()
 	print "Message from the server: ", msg
 	return s.main(ID, msg)
+
+def MyHTMLParser(HTMLParser):
+	def handle_starttag(self, tag, attrs):
+		print("Start tag: ", tag)
+		for attr in attrs:
+			print("    attr: ", attr)
+
+	def handle_endtag(self, tag):
+		print ("End tag: ", tag)
+
+	def handle_data(self, data):
+		print("Data: ", data)
 
 
 # if __name__ == "__main__":

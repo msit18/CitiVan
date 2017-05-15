@@ -37,9 +37,9 @@ def start():
 		print "XML all: ", request.form['XML']
 
 		soup = BeautifulSoup(request.form['XML'], "html.parser")
-		print "second soup: ", soup
-		content = soup.content.string
-		print "sscontent: ", content
+		# print "second soup: ", soup
+		# content = soup.content.string
+		# print "sscontent: ", content
 
 		print "true or false: ", soup.gvisms
 		print "Verify: ", soup.gvisms != None
@@ -48,28 +48,20 @@ def start():
 		print "TF: null?: ", soup.responseType == None
 		print "null again?: ", soup.responseType != None
 
-		print "cellNumber: ", soup.cellNumber
+		cellNumber = soup.cellnumber.string
+		print "cellNumber: ", cellNumber
 
 		if 'gviSms' in xmltodict.parse(request.form):
 		# if soup.gvisms != None:
 			print "GVISMS IF STATEMENT"
-			obj = xmltodict.parse(request.form)['gviSms']
-			cellNumber = obj['cellNumber']
-			content = obj['content']
-			# contentSplit = content[8:].split(']')
+			cellNumber = soup.cellnumber.string
+			content = soup.content.string
 
-			# print "TYPE: ", type(obj)
 			print "OBJ: ", cellNumber
 			print "MESSAGE: ", content
 
-			# print "Parse: ", contentSplit
-			# print "Sent Message: ", contentSplit[0]
-
 			returnVal = analyzeSMSInfo(cellNumber, content)
 			print "returnVal: ", returnVal
-			print type(returnVal)
-
-			#post the xml data to their server
 
 			xmlMessage = \
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
@@ -96,9 +88,13 @@ def start():
 			return "Response received" #Is this sent back as a POST or what kind of message?
 
 		elif 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']:
-			responseText = xmltodict.parse(request.form)['gviSmsResponse']
-			replyMsg = responseText['response']
-			cellphoneNum = responseText['recipient']['msisdn']
+		# elif soup.responseType != None:
+			# responseText = xmltodict.parse(request.form)['gviSmsResponse']
+			replyMsg = soup.response.string
+			cellphoneNum = soup.msisdn.string
+
+			# replyMsg = responseText['response']
+			# cellphoneNum = responseText['recipient']['msisdn']
 			print "REPLY MESSAGE", replyMsg
 			print "CELLNUM: ", cellphoneNum
 			returnReply = analyzeSMSInfo(cellphoneNum, replyMsg)

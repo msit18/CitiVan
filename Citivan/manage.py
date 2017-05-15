@@ -66,10 +66,12 @@ def start():
 		soup = BeautifulSoup(split[1], "html.parser")
 		print "Soup: ", soup
 		soupContent = soup.find('content')
+		coupent = soup.content.string
 		print "content tag: ", soupContent
+		print "coupent: ", coupent
 
-		content_split = soupContent.split('>')
-		print "content_split"
+		# content_split = soupContent.split('>')
+		# print "content_split"
 
 
 		print "True or false: ", ('gviSms' in request.form)

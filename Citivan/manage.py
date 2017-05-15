@@ -60,6 +60,10 @@ def start():
 		print "XML item2: ", request.form['XML'][1]
 		print "XML item3: ", request.form['XML'][2]
 
+		split = request.form['XML'].split('\n')
+		print "Split: ", split[0]
+		print "Split2: ", split[1]
+
 		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):
 			print "GVISMS IF STATEMENT"

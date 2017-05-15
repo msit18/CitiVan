@@ -47,9 +47,11 @@ def start():
 		print "True or false too: ", soup.responseType
 		print "TF: null?: ", soup.responseType == None
 		print "null again?: ", soup.responseType != None
-		print "old parse: ", 'gviSms' in xmltodict.parse(request.form)
+
+		print "cellNumber: ", soup.cellNumber
 
 		if 'gviSms' in xmltodict.parse(request.form):
+		# if soup.gvisms != None:
 			print "GVISMS IF STATEMENT"
 			obj = xmltodict.parse(request.form)['gviSms']
 			cellNumber = obj['cellNumber']

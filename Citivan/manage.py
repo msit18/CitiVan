@@ -63,6 +63,7 @@ def start():
 		print "Split: ", split[0]
 		print "Split2: ", split[1]
 		print "Type of split1: ", type(split[1])
+		print "str spli2: ", str(split[1])
 
 		print "JSON Dumps: ", json.dumps(split[1])
 

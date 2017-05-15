@@ -43,8 +43,10 @@ def start():
 
 		print "true or false: ", soup.gvisms
 		print "Verify: ", soup.gvisms != None
+		print "Second: ", soup.gvisms == None
 		print "True or false too: ", soup.responseType
 		print "TF: null?: ", soup.responseType == None
+		print "null again?: ", soup.responseType != None
 		print "old parse: ", 'gviSms' in xmltodict.parse(request.form)
 
 		if 'gviSms' in xmltodict.parse(request.form):

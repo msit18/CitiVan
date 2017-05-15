@@ -3,7 +3,7 @@ from Citivan import app
 import xmltodict
 import requests
 
-import json, BeautifulSoup
+import json
 
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server

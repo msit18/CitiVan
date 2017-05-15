@@ -65,7 +65,7 @@ def start():
 
 		print "JSON Dumps: ", json.dumps(split[1])
 
-		soup = BeautifulSoup(split[1], 'lxml')
+		soup = BeautifulSoup(str(split[1]), 'lxml')
 		print "Soup: ", soup
 
 		print "True or false: ", ('gviSms' in request.form)

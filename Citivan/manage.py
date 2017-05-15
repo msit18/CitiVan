@@ -62,8 +62,10 @@ def start():
 		split = request.form['XML'].split('\n')
 		print "Split: ", split[0]
 		print "Split2: ", split[1]
-		print "Type of split1: ", type(split[1])
-		print "str spli2: ", str(split[1])
+		strSave = str(split[1])
+		print "str spli2: ", strSave
+		print "save str: ", type(strSave)
+
 
 		print "JSON Dumps: ", json.dumps(split[1])
 

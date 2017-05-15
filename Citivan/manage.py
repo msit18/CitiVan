@@ -55,14 +55,14 @@ def start():
 			obj = xmltodict.parse(request.data)['gviSms']
 			cellNumber = obj['cellNumber']
 			content = obj['content']
-			contentSplit = content[8:].split(']')
+			# contentSplit = content[8:].split(']')
 
-			print "TYPE: ", type(obj)
+			# print "TYPE: ", type(obj)
 			print "OBJ: ", cellNumber
 			print "MESSAGE: ", content
 
-			print "Parse: ", contentSplit
-			print "Sent Message: ", contentSplit[0]
+			# print "Parse: ", contentSplit
+			# print "Sent Message: ", contentSplit[0]
 
 			returnVal = analyzeSMSInfo(cellNumber, content)
 			print "returnVal: ", returnVal
@@ -136,6 +136,7 @@ def start():
 
 def analyzeSMSInfo(ID, msg):
 	s = Server()
+	print "Message from the server: ", msg
 	return s.main(ID, msg)
 
 

@@ -52,6 +52,7 @@ def start():
 		print "FORM",request.form
 		print "DATA ARGS: ", type(request.data)
 		if 'gviSms' in xmltodict.parse(request.data):
+			print "GVISMS IF STATEMENT"
 			obj = xmltodict.parse(request.data)['gviSms']
 			cellNumber = obj['cellNumber']
 			content = obj['content']

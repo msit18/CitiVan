@@ -65,10 +65,13 @@ def start():
 		print "Split2: ", split[1]
 		soup = BeautifulSoup(split[1], "html.parser")
 		print "Soup: ", soup
-		soupContent = soup.find('content')
 		coupent = soup.content.string
-		print "content tag: ", soupContent
 		print "coupent: ", coupent
+
+		secondSoup = BeautifulSoup(request.form['XML'], "html.parser")
+		print "second soup: ", secondSoup
+		sscontent = secondSoup.content.string
+		print "sscontent: ", sscontent
 
 		# content_split = soupContent.split('>')
 		# print "content_split"

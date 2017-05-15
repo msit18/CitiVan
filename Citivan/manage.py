@@ -55,8 +55,10 @@ def start():
 		print "Request keys: ", request.form.keys()
 		print "Request items: ", request.form.items()
 
+		print "XML all: ", request.form['XML']
 		print "XML item: ", request.form['XML'][0]
 		print "XML item2: ", request.form['XML'][1]
+		print "XML item3: ", request.form['XML'][2]
 
 		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):

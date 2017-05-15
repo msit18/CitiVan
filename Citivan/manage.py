@@ -60,24 +60,24 @@ def start():
 		print "Request items: ", request.form.items()
 		print "XML all: ", request.form['XML']
 
-		split = request.form['XML'].split('\n')
-		print "Split: ", split[0]
-		print "Split2: ", split[1]
-		soup = BeautifulSoup(split[1], "html.parser")
-		print "Soup: ", soup
-		coupent = soup.content.string
-		print "coupent: ", coupent
+		# split = request.form['XML'].split('\n')
+		# print "Split: ", split[0]
+		# print "Split2: ", split[1]
+		# soup = BeautifulSoup(split[1], "html.parser")
+		# print "Soup: ", soup
+		# coupent = soup.content.string
+		# print "coupent: ", coupent
 
-		secondSoup = BeautifulSoup(request.form['XML'], "html.parser")
-		print "second soup: ", secondSoup
-		sscontent = secondSoup.content.string
-		print "sscontent: ", sscontent
+		soup = BeautifulSoup(request.form['XML'], "html.parser")
+		print "second soup: ", soup
+		content = soup.content.string
+		print "sscontent: ", content
 
 		# content_split = soupContent.split('>')
 		# print "content_split"
 
+		print "true or false: ", soup.gvisms
 
-		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):
 			print "GVISMS IF STATEMENT"
 			obj = xmltodict.parse(request.form)['gviSms']

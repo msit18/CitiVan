@@ -58,17 +58,16 @@ def start():
 		print "Request items: ", request.form.items()
 
 		print "XML all: ", request.form['XML']
-		print "XML item: ", request.form['XML'][0]
-		print "XML item2: ", request.form['XML'][1]
-		print "XML item3: ", request.form['XML'][2]
 
 		split = request.form['XML'].split('\n')
 		print "Split: ", split[0]
 		print "Split2: ", split[1]
 
-		print "Dict: ", json.dumps(split[1])
+		print "JSON Dumps: ", json.dumps(split[1])
+		print "Dict: ", dict(split[1])
 
-		print "JSON: ", json.dumps(dict(split[1]))
+		soup = BeautifulSoup([split[1]], 'lxml')
+		print "Soup: ", soup
 
 		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):

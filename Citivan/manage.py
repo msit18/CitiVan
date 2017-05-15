@@ -1,14 +1,14 @@
 from flask import request, Response
-# from Citivan import app
+from Citivan import app
 import xmltodict
 import requests
 
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
 
-from flask import Flask
-import os
-app = Flask(__name__)
+# from flask import Flask
+# import os
+# app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
@@ -245,6 +245,6 @@ def analyzeSMSInfo(ID, msg):
 	return s.main(ID, msg)
 
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     app.run(host='0.0.0.0', port=port)

@@ -3,7 +3,7 @@ from Citivan import app
 import xmltodict
 import requests
 
-import json
+import json, BeautifulSoup
 
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
@@ -66,7 +66,9 @@ def start():
 		print "Split: ", split[0]
 		print "Split2: ", split[1]
 
-		print json.dumps(dict(split[1]))
+		print "Dict: ", json.dumps(split[1])
+
+		print "JSON: ", json.dumps(dict(split[1]))
 
 		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):

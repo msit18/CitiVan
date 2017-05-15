@@ -51,8 +51,7 @@ def start():
 		cellNumber = soup.cellnumber.string
 		print "cellNumber: ", cellNumber
 
-		if 'gviSms' in xmltodict.parse(request.form):
-		# if soup.gvisms != None:
+		if soup.gvisms != None:
 			print "GVISMS IF STATEMENT"
 			cellNumber = soup.cellnumber.string
 			content = soup.content.string
@@ -87,8 +86,9 @@ def start():
 
 			return "Response received" #Is this sent back as a POST or what kind of message?
 
-		elif 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']:
-		# elif soup.responseType != None:
+		# elif 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']:
+		elif soup.responseType != None:
+			print "gvismsresponse"
 			# responseText = xmltodict.parse(request.form)['gviSmsResponse']
 			replyMsg = soup.response.string
 			cellphoneNum = soup.msisdn.string
@@ -121,7 +121,6 @@ def start():
 			r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
 			print "Status code: ", r.status_code
 
-			print "Response text. No needed effort unless error or reply"
 			return "Thank you for the response message."
 
 		else:

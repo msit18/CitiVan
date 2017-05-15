@@ -5,6 +5,8 @@ import requests
 
 import json
 
+import BeautifulSoup
+
 from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
 
@@ -62,10 +64,6 @@ def start():
 		split = request.form['XML'].split('\n')
 		print "Split: ", split[0]
 		print "Split2: ", split[1]
-		strSave = str(split[1])
-		print "str spli2: ", strSave
-		print "save str: ", type(strSave)
-
 
 		print "JSON Dumps: ", json.dumps(split[1])
 

@@ -64,7 +64,6 @@ def start():
 		print "Split2: ", split[1]
 
 		print "JSON Dumps: ", json.dumps(split[1])
-		print "Dict: ", dict(split[1])
 
 		soup = BeautifulSoup(split[1], 'lxml')
 		print "Soup: ", soup

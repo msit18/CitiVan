@@ -50,10 +50,10 @@ def start():
 		print "ARGS",request.args
 		print "DATA",request.data
 		print "FORM",request.form
-		print "DATA ARGS: ", type(request.data)
-		if 'gviSms' in xmltodict.parse(request.data):
+		print "DATA ARGS: ", type(request.form)
+		if 'gviSms' in xmltodict.parse(request.form):
 			print "GVISMS IF STATEMENT"
-			obj = xmltodict.parse(request.data)['gviSms']
+			obj = xmltodict.parse(request.form)['gviSms']
 			cellNumber = obj['cellNumber']
 			content = obj['content']
 			# contentSplit = content[8:].split(']')
@@ -95,8 +95,8 @@ def start():
 
 			return "Response received" #Is this sent back as a POST or what kind of message?
 
-		elif 'reply' in xmltodict.parse(request.data)['gviSmsResponse']['responseType']:
-			responseText = xmltodict.parse(request.data)['gviSmsResponse']
+		elif 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']:
+			responseText = xmltodict.parse(request.form)['gviSmsResponse']
 			replyMsg = responseText['response']
 			cellphoneNum = responseText['recipient']['msisdn']
 			print "REPLY MESSAGE", replyMsg
@@ -129,7 +129,7 @@ def start():
 			return "Thank you for the response message."
 			#what to do if error or reply messagae? Error handling...
 		else:
-			print "KEYS: ", xmltodict.parse(request.data).keys()
+			print "KEYS: ", xmltodict.parse(request.form).keys()
 			return "Sorry, we could not handle that request"
 
 	else:
@@ -146,9 +146,9 @@ def second_start():
 		print "ARGS",request.args
 		print "DATA",request.data
 		print "FORM",request.form
-		print "DATA ARGS: ", type(request.data)
-		if 'gviSms' in xmltodict.parse(request.data):
-			obj = xmltodict.parse(request.data)['gviSms']
+		print "DATA ARGS: ", type(request.form)
+		if 'gviSms' in xmltodict.parse(request.form):
+			obj = xmltodict.parse(request.form)['gviSms']
 			cellNumber = obj['cellNumber']
 			content = obj['content']
 			# contentSplit = content[8:].split(']')
@@ -194,8 +194,8 @@ def second_start():
 			# return "Response received" #Is this sent back as a POST or what kind of message?
 			# return Response(xmlMessage, mimetype='text/xml')
 
-		elif 'reply' in xmltodict.parse(request.data)['gviSmsResponse']['responseType']:
-			responseText = xmltodict.parse(request.data)['gviSmsResponse']
+		elif 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']:
+			responseText = xmltodict.parse(request.form)['gviSmsResponse']
 			replyMsg = responseText['response']
 			cellphoneNum = responseText['recipient']['msisdn']
 			print "REPLY MESSAGE", replyMsg
@@ -234,7 +234,7 @@ def second_start():
 			# return Response(xmlReplyMessage, mimetype='text/xml')
 			#what to do if error or reply messagae? Error handling...
 		else:
-			print "KEYS: ", xmltodict.parse(request.data).keys()
+			print "KEYS: ", xmltodict.parse(request.form).keys()
 			return "Sorry, we could not handle that request"
 
 	else:

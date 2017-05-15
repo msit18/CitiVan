@@ -6,7 +6,6 @@ import requests
 import json
 
 from bs4 import BeautifulSoup
-from html.parser import HTMLParser
 
 # from analyzeSMSResponses import CitivanSMS
 from analyzeSMSResponses import Server
@@ -71,11 +70,6 @@ def start():
 
 		content_split = soupContent.split('>')
 		print "content_split"
-
-
-		parser = MyHTMLParser()
-		parser.feed(request.form['XML'])
-		print "end of parser"
 
 
 		print "True or false: ", ('gviSms' in request.form)
@@ -272,18 +266,6 @@ def analyzeSMSInfo(ID, msg):
 	s = Server()
 	print "Message from the server: ", msg
 	return s.main(ID, msg)
-
-def MyHTMLParser(HTMLParser):
-	def handle_starttag(self, tag, attrs):
-		print("Start tag: ", tag)
-		for attr in attrs:
-			print("    attr: ", attr)
-
-	def handle_endtag(self, tag):
-		print ("End tag: ", tag)
-
-	def handle_data(self, data):
-		print("Data: ", data)
 
 
 # if __name__ == "__main__":

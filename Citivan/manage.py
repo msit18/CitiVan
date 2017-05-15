@@ -66,9 +66,11 @@ def start():
 		print "Split2: ", split[1]
 
 		# print "JSON Dumps: ", json.dumps(split[1])
-
-		soup = BeautifulSoup(str(split[1]), 'lxml')
-		print "Soup: ", soup
+		try:
+			soup = BeautifulSoup(str(split[1]), 'lxml')
+			print "Soup: ", soup
+		except:
+			raise
 
 		print "True or false: ", ('gviSms' in request.form)
 		if 'gviSms' in xmltodict.parse(request.form):

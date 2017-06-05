@@ -176,6 +176,7 @@ class CitivanSMS:
 		overrideReturnValue = ""
 		# print "self.json: ", self.json
 		userTextSplit = userText.split()
+		print "USERTEXTSPLIT LEN: ", len(userTextSplit)
 		try:
 			###DOES USER EXIST? If so, then all the other functions are allowed.
       		#If this is a new user, disregard the input text and just create a new profile
@@ -186,7 +187,7 @@ class CitivanSMS:
 				callerHashInfo = self.json[self.callerID]
 
 				#Creates new survey hash if last is full
-				if (callerHashInfo["convoNum"]>6) & (userTextSplit[0] != "rate"):
+				if (callerHashInfo["convoNum"]>6) & (userTextSplit[0] != "rate") & (len(userTextSplit) > 1):
 					print "CREATING NEW SURVEY HASH. LAST SURVEY IS FULL"
 					self.json[self.callerID]["convoNum"] = 1
 					newHash = {"LastSubmitTime":0, "1":0, "2":0, "3":0, "4":0, "5":0, "6":0}
@@ -199,7 +200,7 @@ class CitivanSMS:
 					overrideReturnValue = ""
 
 					###RATE CMD
-					if userTextSplit[0] == "rate":
+					if (userTextSplit[0] == "rate") & (len(userTextSplit) > 1):
 						print "running rate function"
 						overrideReturnValue = self.rateBus(userTextSplit[1], currentConvoNum)
 
@@ -215,8 +216,9 @@ class CitivanSMS:
 				self.json[self.callerID] = newCaller
 				newUser = True
 
-				if userTextSplit[0] == "rate":
+				if (userTextSplit[0] == "rate") & (len(userTextSplit)>1):
 					print "Running rate function"
+					print "LENNNN: ", len(userTextSplit)
 					overrideReturnValue = self.rateBus(userTextSplit[1], 1)
 
 		finally:
@@ -246,6 +248,9 @@ class CitivanSMS:
 		return returnValue
 
 # if __name__ == '__main__':
+# 	s = Server()
+# 	s.main('8583807847', 'Rate')
+
 	# questions = ["What are the last four digits of the minibus license plate? (Example: for CA34578, enter 4578).", 
 	# 			"Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
 	# 			"Rate from 1 to 5, how comfortable you are in the vehicle? 1) Very Uncomfortable 2) Uncomfortable 3) Average 4) Good 5) Very Comfortable",

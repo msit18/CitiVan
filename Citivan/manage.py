@@ -129,22 +129,6 @@ def start():
 	else:
 		return "This page does not exist!"
 
-@app.route('/xmlPageV2', methods=['GET', 'POST'])
-def second_start():
-	if request.method == 'GET':
-		return "GET METHOD FOR XML PAGE V2. THIS PAGE HAS BEEN REMOVED"
-	elif request.method == 'POST':
-		print "HEADERS", request.headers
-		print "REQ_path", request.path
-		print "ARGS",request.args
-		print "DATA",request.data
-		print "FORM",request.form
-		print "DATA ARGS: ", type(request.form)
-		return "This page has been removed."
-
-	else:
-		return "This page does not exist!"
-
 def analyzeSMSInfo(ID, msg):
 	s = Server()
 	print "Message from the server: ", msg

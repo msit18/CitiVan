@@ -48,8 +48,8 @@ def start():
 		print "TF: null?: ", soup.responseType == None
 		print "null again?: ", soup.responseType != None
 
-		cellNumber = soup.cellnumber.string
-		print "cellNumber: ", cellNumber
+		# cellNumber = soup.cellnumber.string
+		# print "cellNumber: ", cellNumber
 
 		if soup.gvisms != None:
 			print "GVISMS IF STATEMENT"
@@ -124,6 +124,7 @@ def start():
 			return "Thank you for the response message."
 
 		else:
+			print "THIS IS THE ELSE STATEMENT. SOUP IS NONE"
 			return "Sorry, we could not handle that request"
 
 	else:

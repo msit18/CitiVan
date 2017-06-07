@@ -135,52 +135,51 @@ def soupMethod(xmlText):
 def xmltodictMethod(xmlText):
 	print "XML text: ", xmlText
 	print "find keys: ", xmltodict.parse(xmlText)
-	try:
-		if 'gviSms' in xmltodict.parse(xmlText):
-			print "GVISMS IF STATEMENT"
-			obj = xmltodict.parse(xmlText)['gviSms']
-			cellNumber = obj['cellNumber']
-			content = obj['content']
+	# try:
+	if 'gviSms' in xmltodict.parse(xmlText):
+		print "GVISMS IF STATEMENT"
+		obj = xmltodict.parse(xmlText)['gviSms']
+		cellNumber = obj['cellNumber']
+		content = obj['content']
 
-			print "OBJ: ", cellNumber
-			print "MESSAGE: ", content
+		print "OBJ: ", cellNumber
+		print "MESSAGE: ", content
 
-			returnVal = analyzeSMSInfo(cellNumber, content)
-			print "returnVal: ", returnVal
-			print type(returnVal)
+		returnVal = analyzeSMSInfo(cellNumber, content)
+		print "returnVal: ", returnVal
+		print type(returnVal)
 
-			print "SENDING XML MESSAGE BACK"
-			sendXMLBack(returnVal, cellNumber)
+		print "SENDING XML MESSAGE BACK"
+		sendXMLBack(returnVal, cellNumber)
 
-			return "success"
+		return "success"
 
-		elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
-			responseText = xmltodict.parse(xmlText)['gviSmsResponse']
-			replyMsg = responseText['response']
-			cellNumber = responseText['recipient']['msisdn']
-			print "REPLY MESSAGE", replyMsg
-			print "CELLNUM: ", cellNumber
-			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
-			print "returnReply: ", returnReply
+	elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
+		responseText = xmltodict.parse(xmlText)['gviSmsResponse']
+		replyMsg = responseText['response']
+		cellNumber = responseText['recipient']['msisdn']
+		print "REPLY MESSAGE", replyMsg
+		print "CELLNUM: ", cellNumber
+		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
+		print "returnReply: ", returnReply
 
-			print "SENDING XML MESSAGE BACK"
-			sendXMLBack(returnReply, cellNumber)
+		print "SENDING XML MESSAGE BACK"
+		sendXMLBack(returnReply, cellNumber)
 
-			print "Response text. No needed effort unless error or reply"
-			return "success"
+		print "Response text. No needed effort unless error or reply"
+		return "success"
 
-		elif ('error' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']) | 
-			('receipt' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']):
-			print "GRAPEVINE SERVER IS SENDING AN ERROR OR RECEIPT BACK TO THIS SERVER."
-			return "success"
+	elif ('error' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']) | ('receipt' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']):
+		print "GRAPEVINE SERVER IS SENDING AN ERROR OR RECEIPT BACK TO THIS SERVER."
+		return "success"
 
-		else:
-			print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
-			return "error"
-	except:
-		print "KEYS: ", xmltodict.parse(xmlText)
+	else:
 		print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
 		return "error"
+	# except:
+	# 	print "KEYS: ", xmltodict.parse(xmlText)
+	# 	print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
+	# 	return "error"
 
 def stringParse(text):
 	print "stringParse received this: ", text
@@ -227,38 +226,38 @@ def stringParse(text):
 			replyMsg = s[0]
 			print "message: ", replyMsg
 
-	try:
-		if whichMessage == "gvisms":
-			print "gvisms whichmessage"
-			print "cellNumber: ", cellNumber
-			print "content: ", content
+	# try:
+	if whichMessage == "gvisms":
+		print "gvisms whichmessage"
+		print "cellNumber: ", cellNumber
+		print "content: ", content
 
-			returnVal = analyzeSMSInfo(cellNumber, content)
-			print "returnVal: ", returnVal
+		returnVal = analyzeSMSInfo(cellNumber, content)
+		print "returnVal: ", returnVal
 
-			print "SENDING XML MESSAGE BACK"
-			sendXMLBack(returnVal, cellNumber)
+		print "SENDING XML MESSAGE BACK"
+		sendXMLBack(returnVal, cellNumber)
 
-			return "success"
+		return "success"
 
-		elif (whichMessage == "gvismsresponse") & (resType != "receipt") & (resType != "error"):
-			print "gvismsresponse whichmessage"
-			print "cellNumber: ", cellNumber
-			print "replyMsg: ", replyMsg
-			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
+	elif (whichMessage == "gvismsresponse") & (resType != "receipt") & (resType != "error"):
+		print "gvismsresponse whichmessage"
+		print "cellNumber: ", cellNumber
+		print "replyMsg: ", replyMsg
+		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 
-			print "SENDING XML MESSAGE BACK"
-			sendXMLBack(returnReply, cellNumber)
+		print "SENDING XML MESSAGE BACK"
+		sendXMLBack(returnReply, cellNumber)
 
-			print "Response text. No needed effort unless error or reply"
-			return "success"
+		print "Response text. No needed effort unless error or reply"
+		return "success"
 
-		else:
-			print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
-			return "error"
-	except:
+	else:
 		print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
 		return "error"
+	# except:
+	# 	print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
+	# 	return "error"
 
 
 # if __name__ == "__main__":

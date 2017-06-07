@@ -26,146 +26,62 @@ def login():
 @app.route('/xmlPage', methods=['GET', 'POST'])
 def start():
 	if request.method == 'GET':
+		print "END OF LOGS"
 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. UPDATE 06/06 9:54"
 	elif request.method == 'POST':
 		print "HEADERS", request.headers
 		print "REQ_path", request.path
 		print "ARGS",request.args
 		print "DATA",request.data
-		# print "FORM",request.form
-		# print "DATA ARGS: ", type(request.form)
-		# print "XML all: ", request.form['XML']
 		print "FORM",request.form
-		print "DATA ARGS: ", type(request.data)
-		print "XML all: ", request.data
+		print "DATA ARGS: ", type(request.form)
+		print "XML all: ", request.form['XML']
 
 		print "try the various methods---------"
-		# tryMethod = soupMethod(request.form)
-		tryMethod = soupMethod(request.data)
-		print "TRYMETHOD RESULT: ", tryMethod
-		if tryMethod == "error":
-			# tryMethod = xmltodictMethod(request.form)
-			tryMethod = xmltodictMethod(request.data)
-			print "TRYMETHOD RESULT: ", tryMethod
-			if tryMethod == "error":
-				# tryMethod = stringParse(request.form)
-				tryMethod = stringParse(request.data)
-				print "TRYMETHOD RESULT: ", tryMethod
-				print "ERROR. COULD NOT PROCESS THIS REQUEST"
-				return "ERROR. COULE NOT PROCESS THIS REQUEST."
-		elif tryMethod == "success":
-			print "Success!"
-			return "Response received"
 
+		tryMethod = soupMethod(request.form)
+		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
+		if trySoupMethod == "error":
+			tryMethod = xmltodictMethod(request.form)
+			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
+			if tryXMLMethod == "error":
+				tryMethod = stringParse(request.form)
+				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
+				if tryStrParseMethod == "error":
+					print "ERROR. COULD NOT PROCESS THIS REQUEST"
+					print "END OF LOGS"
+					return "ERROR. COULD NOT PROCESS THIS REQUEST"
+		print "END OF LOGS. SOME SUCCESS"
+		return "Response received"
 
-		# # soup = BeautifulSoup(request.form['XML'], "html.parser")
-		# soup = BeautifulSoup(request.data, "html.parser")
-		# print "true or false: ", soup.gvisms
-		# print "Verify: ", soup.gvisms != None
-		# print "Second: ", soup.gvisms == None
-		# print "True or false too: ", soup.responseType
-		# print "TF: null?: ", soup.responseType == None
-		# print "null again?: ", soup.responseType != None
-		# print "end soup test----------------"
-
-		# if soup.gvisms != None:
-		# 	print "GVISMS IF STATEMENT"
-		# 	cellNumber = soup.cellnumber.string
-		# 	content = soup.content.string
-
-		# 	print "OBJ: ", cellNumber
-		# 	print "MESSAGE: ", content
-
-		# 	returnVal = analyzeSMSInfo(cellNumber, content)
-		# 	print "returnVal: ", returnVal
-
-		# 	xmlMessage = \
-		# 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-		# 		"<gviSmsMessage>"\
-		# 		    "<affiliateCode>CIT003-485</affiliateCode>"\
-		# 		    "<authenticationCode>19070017</authenticationCode>"\
-		# 		    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-		# 		    "<messageType>text</messageType>"\
-		# 		    "<recipientList>"\
-		# 		        "<message>{0}</message>"\
-		# 		        "<recipient>"\
-		# 		            "<msisdn>{1}</msisdn>"\
-		# 		        "</recipient>"\
-		# 		    "</recipientList>"\
-		# 		"</gviSmsMessage>".format(returnVal, cellNumber)
-
-		# 	print xmlMessage
-
-		# 	headers = {'Content-Type': 'application/xml'}
-		# 	r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
-		# 	print "Status code: ", r.status_code
-
-		# 	return "Response received"
-
-		# elif soup.responseType != None:
-		# 	print "gvismsresponse"
-		# 	replyMsg = soup.response.string
-		# 	cellNumber = soup.msisdn.string
-
-		# 	print "REPLY MESSAGE", replyMsg
-		# 	print "CELLNUM: ", cellNumber
-		# 	returnReply = analyzeSMSInfo(cellNumber, replyMsg)
-		# 	print "returnReply: ", returnReply
-
-		# 	xmlReplyMessage = \
-		# 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-		# 		"<gviSmsMessage>"\
-		# 		    "<affiliateCode>CIT003-485</affiliateCode>"\
-		# 		    "<authenticationCode>19070017</authenticationCode>"\
-		# 		    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-		# 		    "<messageType>text</messageType>"\
-		# 		    "<recipientList>"\
-		# 		        "<message>{0}</message>"\
-		# 		        "<recipient>"\
-		# 		            "<msisdn>{1}</msisdn>"\
-		# 		        "</recipient>"\
-		# 		    "</recipientList>"\
-		# 		"</gviSmsMessage>".format(returnReply, cellNumber)
-
-		# 	print "replyXMLMSG: ", xmlReplyMessage
-
-		# 	headers = {'Content-Type': 'application/xml'}
-		# 	r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
-		# 	print "Status code: ", r.status_code
-
-		# 	return "Thank you for the response message."
-
-		# else:
-		# 	print "THIS IS THE ELSE STATEMENT. SOUP IS NONE. TRYING ANOTHER METHOD"
-		# 	print "---------"
-		# 	# print "xmltodict true or false: ", 'gviSms' in xmltodict.parse(request.form)
-		# 	# print "replymessage maybe?: ", 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']
-		# 	# print "all xmltodict: ", xmltodict.parse(request.form)
-		# 	# answer = alternativeMethod(request.form)
-		# 	print "xmltodict true or false: ", 'gviSms' in xmltodict.parse(request.data)
-		# 	print "replymessage maybe?: ", 'reply' in xmltodict.parse(request.data)['gviSmsResponse']['responseType']
-		# 	print "all xmltodict: ", xmltodict.parse(request.data)
-		# 	answer = alternativeMethod(request.data)
-		# 	print "ANSWER?: ", answer
-		# 	if answer == "Response received":
-		# 		return "Response received"
-		# 	else:
-		# 		print "THIS IS THE LAST ATTEMPT. STRING PARSE METHOD"
-		# 		# lastattempt = stringParse(request.form)
-		# 		lastattempt = stringParse(request.data)
-		# 		if lastattempt == "Response received":
-		# 			return "Response received"
-		# 		else:
-		# 			print "THAT WAS THE LAST STRAW. CANNOT WORK"
-		# 			return "THERE WAS AN ERROR"
 	else:
 		return "This page does not exist!"
-	print "END OF LOGS"
 
 def analyzeSMSInfo(ID, msg):
 	s = Server()
 	print "Message from the server: ", msg
 	return s.main(ID, msg)
+
+def sendXMLBack (sendBackMessage, cellNumber):
+	xmlMessage = \
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
+		"<gviSmsMessage>"\
+		    "<affiliateCode>CIT003-485</affiliateCode>"\
+		    "<authenticationCode>19070017</authenticationCode>"\
+		    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
+		    "<messageType>text</messageType>"\
+		    "<recipientList>"\
+		        "<message>{0}</message>"\
+		        "<recipient>"\
+		            "<msisdn>{1}</msisdn>"\
+		        "</recipient>"\
+		    "</recipientList>"\
+		"</gviSmsMessage>".format(sendBackMessage, cellNumber)
+	print xmlMessage
+
+	headers = {'Content-Type': 'application/xml'}
+	r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
+	print "Status code: ", r.status_code
 
 def soupMethod(xmlText):
 	print "verifying soup works---------"
@@ -190,26 +106,8 @@ def soupMethod(xmlText):
 		returnVal = analyzeSMSInfo(cellNumber, content)
 		print "returnVal: ", returnVal
 
-		xmlMessage = \
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-			"<gviSmsMessage>"\
-			    "<affiliateCode>CIT003-485</affiliateCode>"\
-			    "<authenticationCode>19070017</authenticationCode>"\
-			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-			    "<messageType>text</messageType>"\
-			    "<recipientList>"\
-			        "<message>{0}</message>"\
-			        "<recipient>"\
-			            "<msisdn>{1}</msisdn>"\
-			        "</recipient>"\
-			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnVal, cellNumber)
-
-		print xmlMessage
-
-		headers = {'Content-Type': 'application/xml'}
-		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
-		print "Status code: ", r.status_code
+		print "SENDING XML MESSAGE BACK"
+		sendXMLBack(returnVal, cellNumber)
 
 		return "success"
 
@@ -223,26 +121,8 @@ def soupMethod(xmlText):
 		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 		print "returnReply: ", returnReply
 
-		xmlReplyMessage = \
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-			"<gviSmsMessage>"\
-			    "<affiliateCode>CIT003-485</affiliateCode>"\
-			    "<authenticationCode>19070017</authenticationCode>"\
-			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-			    "<messageType>text</messageType>"\
-			    "<recipientList>"\
-			        "<message>{0}</message>"\
-			        "<recipient>"\
-			            "<msisdn>{1}</msisdn>"\
-			        "</recipient>"\
-			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnReply, cellNumber)
-
-		print "replyXMLMSG: ", xmlReplyMessage
-
-		headers = {'Content-Type': 'application/xml'}
-		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
-		print "Status code: ", r.status_code
+		print "SENDING XML MESSAGE BACK"
+		sendXMLBack(returnReply, cellNumber)
 
 		return "success"
 
@@ -253,82 +133,48 @@ def soupMethod(xmlText):
 
 def xmltodictMethod(xmlText):
 	print "XML text: ", xmlText
-	print "find keys: ", xmltodict.parse(xmlText).keys()
-	if 'gviSms' in xmltodict.parse(xmlText):
-		print "GVISMS IF STATEMENT"
-		obj = xmltodict.parse(xmlText)['gviSms']
-		cellNumber = obj['cellNumber']
-		content = obj['content']
+	print "find keys: ", xmltodict.parse(xmlText)
+	try:
+		if 'gviSms' in xmltodict.parse(xmlText):
+			print "GVISMS IF STATEMENT"
+			obj = xmltodict.parse(xmlText)['gviSms']
+			cellNumber = obj['cellNumber']
+			content = obj['content']
 
-		print "OBJ: ", cellNumber
-		print "MESSAGE: ", content
+			print "OBJ: ", cellNumber
+			print "MESSAGE: ", content
 
-		returnVal = analyzeSMSInfo(cellNumber, content)
-		print "returnVal: ", returnVal
-		print type(returnVal)
+			returnVal = analyzeSMSInfo(cellNumber, content)
+			print "returnVal: ", returnVal
+			print type(returnVal)
 
-		xmlMessage = \
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-			"<gviSmsMessage>"\
-			    "<affiliateCode>CIT003-485</affiliateCode>"\
-			    "<authenticationCode>19070017</authenticationCode>"\
-			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-			    "<messageType>text</messageType>"\
-			    "<recipientList>"\
-			        "<message>{0}</message>"\
-			        "<recipient>"\
-			            "<msisdn>{1}</msisdn>"\
-			        "</recipient>"\
-			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnVal, cellNumber)
+			print "SENDING XML MESSAGE BACK"
+			sendXMLBack(returnVal, cellNumber)
 
-		print xmlMessage
+			return "success"
 
-		headers = {'Content-Type': 'application/xml'}
-		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
-		print "Status code: ", r.status_code
+		elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
+			responseText = xmltodict.parse(xmlText)['gviSmsResponse']
+			replyMsg = responseText['response']
+			cellNumber = responseText['recipient']['msisdn']
+			print "REPLY MESSAGE", replyMsg
+			print "CELLNUM: ", cellNumber
+			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
+			print "returnReply: ", returnReply
 
-		return "success"
+			print "SENDING XML MESSAGE BACK"
+			sendXMLBack(returnReply, cellNumber)
 
-	elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
-		responseText = xmltodict.parse(xmlText)['gviSmsResponse']
-		replyMsg = responseText['response']
-		cellNumber = responseText['recipient']['msisdn']
-		print "REPLY MESSAGE", replyMsg
-		print "CELLNUM: ", cellNumber
-		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
-		print "returnReply: ", returnReply
-
-		xmlReplyMessage = \
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-			"<gviSmsMessage>"\
-			    "<affiliateCode>CIT003-485</affiliateCode>"\
-			    "<authenticationCode>19070017</authenticationCode>"\
-			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-			    "<messageType>text</messageType>"\
-			    "<recipientList>"\
-			        "<message>{0}</message>"\
-			        "<recipient>"\
-			            "<msisdn>{1}</msisdn>"\
-			        "</recipient>"\
-			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnReply, cellNumber)
-
-		print "replyXMLMSG: ", xmlReplyMessage
-
-		headers = {'Content-Type': 'application/xml'}
-		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
-		print "Status code: ", r.status_code
-
-		print "Response text. No needed effort unless error or reply"
-		return "success"
-	else:
-		print "KEYS: ", xmltodict.parse(xmlText).keys()
+			print "Response text. No needed effort unless error or reply"
+			return "success"
+	except:
+		print "KEYS: ", xmltodict.parse(xmlText)
 		print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
 		return "error"
 
 def stringParse(text):
-	parse = str.split(">")
+	print "stringParse received this: ", text
+	parse = text.split(">")
 	print "PARSE: ", parse
 	whichMessage = ""
 
@@ -371,67 +217,32 @@ def stringParse(text):
 			replyMsg = s[0]
 			print "message: ", replyMsg
 
-	if whichMessage == "gvisms":
-		print "gvisms whichmessage"
-		print "cellNumber: ", cellNumber
-		print "content: ", content
+	try:
+		if whichMessage == "gvisms":
+			print "gvisms whichmessage"
+			print "cellNumber: ", cellNumber
+			print "content: ", content
 
-		returnVal = analyzeSMSInfo(cellNumber, content)
-		print "returnVal: ", returnVal
+			returnVal = analyzeSMSInfo(cellNumber, content)
+			print "returnVal: ", returnVal
 
-		xmlMessage = \
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-			"<gviSmsMessage>"\
-			    "<affiliateCode>CIT003-485</affiliateCode>"\
-			    "<authenticationCode>19070017</authenticationCode>"\
-			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-			    "<messageType>text</messageType>"\
-			    "<recipientList>"\
-			        "<message>{0}</message>"\
-			        "<recipient>"\
-			            "<msisdn>{1}</msisdn>"\
-			        "</recipient>"\
-			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnVal, cellNumber)
+			print "SENDING XML MESSAGE BACK"
+			sendXMLBack(returnVal, cellNumber)
 
-		print xmlMessage
+			return "success"
 
-		headers = {'Content-Type': 'application/xml'}
-		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
-		print "Status code: ", r.status_code
+		elif (whichMessage == "gvismsresponse") & (resType != "receipt") & (resType != "error"):
+			print "gvismsresponse whichmessage"
+			print "cellNumber: ", cellNumber
+			print "replyMsg: ", replyMsg
+			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 
-		return "success"
+			print "SENDING XML MESSAGE BACK"
+			sendXMLBack(returnReply, cellNumber)
 
-	elif (whichMessage == "gvismsresponse") & (resType != "receipt") & (resType != "error"):
-		print "gvismsresponse whichmessage"
-		print "cellNumber: ", cellNumber
-		print "replyMsg: ", replyMsg
-		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
-
-		xmlReplyMessage = \
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
-			"<gviSmsMessage>"\
-			    "<affiliateCode>CIT003-485</affiliateCode>"\
-			    "<authenticationCode>19070017</authenticationCode>"\
-			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
-			    "<messageType>text</messageType>"\
-			    "<recipientList>"\
-			        "<message>{0}</message>"\
-			        "<recipient>"\
-			            "<msisdn>{1}</msisdn>"\
-			        "</recipient>"\
-			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnReply, cellNumber)
-
-		print "replyXMLMSG: ", xmlReplyMessage
-
-		headers = {'Content-Type': 'application/xml'}
-		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
-		print "Status code: ", r.status_code
-
-		print "Response text. No needed effort unless error or reply"
-		return "success"
-	else:
+			print "Response text. No needed effort unless error or reply"
+			return "success"
+	except:
 		print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
 		return "error"
 

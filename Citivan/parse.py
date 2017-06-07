@@ -1,25 +1,25 @@
 str = "<gviSmsResponse xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"\
 	"<responseDateTime>2017-06-06T13:27:00</responseDateTime>"\
 	"<submitDateTime>2017-06-06T13:27:00</submitDateTime>"\
-	"<recipient><msisdn>27825932725</msisdn></recipient>"\
+	"<recipient><msisdn>27843314887</msisdn></recipient>"\
 	"<responseType>receipt</responseType>"\
 	"<status><code>0</code><reason>Message is delivered to destination. stat:DELIVRD</reason></status></gviSmsResponse>"
 
 # str = "<gviSmsResponse xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"\
 # 	"<responseDateTime>2017-06-06T13:29:53</responseDateTime>"\
-# 	"<recipient><msisdn>27825932725</msisdn></recipient>"\
+# 	"<recipient><msisdn>27843314887</msisdn></recipient>"\
 # 	"<responseType>reply</responseType><response>5</response></gviSmsResponse>"
 
 # str = "<gviSmsResponse xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"\
 # "<responseDateTime>2007-03-02T13:16:20</responseDateTime>"\
-# "<recipient><msisdn>27834451878</msisdn></recipient>"\
+# "<recipient><msisdn>27843314887</msisdn></recipient>"\
 # "<responseType>reply</responseType>"\
 # "<response>Thanks</response></gviSmsResponse>"\
 
 # str = "<gviSmsResponse xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"\
 # "<responseDateTime>2002-12-19T12:53:29</responseDateTime>"\
 # "<submitDateTime>2002-12-19T12:53:48</submitDateTime>"\
-# "<recipient><msisdn>27823398094</msisdn></recipient>"\
+# "<recipient><msisdn>27843314887</msisdn></recipient>"\
 # "<responseType>error</responseType><status><code>-1</code>"\
 # "<reason>SMSC Error: Message is undeliverable. stat:UNDELVR</reason>"\
 # "</status></gviSmsResponse>"
@@ -27,7 +27,7 @@ str = "<gviSmsResponse xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
 # str = "<gviSms>"\
 # "<smsDateTime>2005-09-08T10:06:03</smsDateTime>"\
 # "<gatewayIdentifier>ThreeRandVodaRx1</gatewayIdentifier>"\
-# "<cellNumber>27827891099</cellNumber>"\
+# "<cellNumber>27843314887</cellNumber>"\
 # "<smsLocation>35444</smsLocation>"\
 # "<content><![CDATA[Lindiwe Sisulu, KZN]]></content>"\
 # "</gviSms>"

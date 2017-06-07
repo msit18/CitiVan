@@ -259,20 +259,21 @@ def stringParse(text):
 
 		return "success"
 
-	elif (whichMessage == "gvismsresponse") & (resType != "receipt") & (resType != "error"):
-		print "gvismsresponse whichmessage"
-		print "cellNumber: ", cellNumber
-		print "replyMsg: ", replyMsg
-		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
+	elif (whichMessage == "gvismsresponse"):
+		if resType == "reply":
+			print "gvismsresponse whichmessage"
+			print "cellNumber: ", cellNumber
+			print "replyMsg: ", replyMsg
+			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 
-		print "SENDING XML MESSAGE BACK"
-		sendXMLBack(returnReply, cellNumber)
+			print "SENDING XML MESSAGE BACK"
+			sendXMLBack(returnReply, cellNumber)
 
-		print "Response text. ReturnReply sent back"
-		return "success"
+			print "Response text. ReturnReply sent back"
 
-	elif (resType != "receipt") & (resType != "error"):
-		print "Response text. GrapeVine server has sent an error or receipt message. No reponse needed"
+		elif (resType == "receipt") | (resType == "error"):
+			print "Response text. GrapeVine server has sent an error or receipt message. No reponse needed"
+		
 		return "success"
 
 	else:

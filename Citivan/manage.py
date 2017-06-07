@@ -198,7 +198,7 @@ def xmltodictMethod(xmlText):
 def stringParse(text):
 	# print "stringParse received this: ", text
 	parse = text.split(">")
-	print "PARSE: ", parse
+	# print "PARSE: ", parse
 	whichMessage = ""
 
 	for word in range(len(parse)):

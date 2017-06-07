@@ -82,7 +82,7 @@ def sendXMLBack (sendBackMessage, cellNumber):
 	headers = {'Content-Type': 'application/xml'}
 	r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
 	print "Status code: ", r.status_code
-	return r
+	# return r
 
 def soupMethod(xmlText):
 	print "verifying soup works---------"

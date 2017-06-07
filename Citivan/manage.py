@@ -1,5 +1,5 @@
 from flask import request, Response
-from Citivan import app
+# from Citivan import app
 import xmltodict
 import requests
 
@@ -7,9 +7,9 @@ from bs4 import BeautifulSoup
 
 from analyzeSMSResponses import Server
 
-# from flask import Flask
-# import os
-# app = Flask(__name__)
+from flask import Flask
+import os
+app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
@@ -39,13 +39,13 @@ def start():
 
 		print "try the various methods---------"
 
-		tryMethod = soupMethod(request.form['XML'])
+		trySoupMethod = soupMethod(request.form['XML'])
 		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
 		if trySoupMethod == "error":
-			tryMethod = xmltodictMethod(request.form['XML'])
+			tryXMLMethod = xmltodictMethod(request.form['XML'])
 			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
 			if tryXMLMethod == "error":
-				tryMethod = stringParse(request.form['XML'])
+				tryStrParseMethod = stringParse(request.form['XML'])
 				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
 				if tryStrParseMethod == "error":
 					print "ERROR. COULD NOT PROCESS THIS REQUEST"
@@ -247,6 +247,6 @@ def stringParse(text):
 		return "error"
 
 
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", 5000))
-#     app.run(host='0.0.0.0', port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)

@@ -39,13 +39,13 @@ def start():
 
 		print "try the various methods---------"
 
-		tryMethod = soupMethod(request.form)
+		tryMethod = soupMethod(request.form['XML'])
 		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
 		if trySoupMethod == "error":
-			tryMethod = xmltodictMethod(request.form)
+			tryMethod = xmltodictMethod(request.form['XML'])
 			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
 			if tryXMLMethod == "error":
-				tryMethod = stringParse(request.form)
+				tryMethod = stringParse(request.form['XML'])
 				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
 				if tryStrParseMethod == "error":
 					print "ERROR. COULD NOT PROCESS THIS REQUEST"

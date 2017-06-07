@@ -140,11 +140,9 @@ def start():
 				else:
 					print "THAT WAS THE LAST STRAW. CANNOT WORK"
 					return "THERE WAS AN ERROR"
-	print "END OF LOGS"
-
-
 	else:
 		return "This page does not exist!"
+	print "END OF LOGS"
 
 def analyzeSMSInfo(ID, msg):
 	s = Server()

@@ -196,7 +196,7 @@ def alternativeMethod(xmlText):
 		replyMsg = responseText['response']
 		cellNumber = responseText['recipient']['msisdn']
 		print "REPLY MESSAGE", replyMsg
-		print "CELLNUM: ", cellphoneNum
+		print "CELLNUM: ", cellNumber
 		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 		print "returnReply: ", returnReply
 

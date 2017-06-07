@@ -268,7 +268,11 @@ def stringParse(text):
 		print "SENDING XML MESSAGE BACK"
 		sendXMLBack(returnReply, cellNumber)
 
-		print "Response text. No needed effort unless error or reply"
+		print "Response text. ReturnReply sent back"
+		return "success"
+
+	elif (resType != "receipt") & (resType != "error"):
+		print "Response text. GrapeVine server has sent an error or receipt message. No reponse needed"
 		return "success"
 
 	else:

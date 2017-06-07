@@ -32,12 +32,16 @@ def start():
 		print "REQ_path", request.path
 		print "ARGS",request.args
 		print "DATA",request.data
+		# print "FORM",request.form
+		# print "DATA ARGS: ", type(request.form)
+		# print "XML all: ", request.form['XML']
 		print "FORM",request.form
-		print "DATA ARGS: ", type(request.form)
-		print "XML all: ", request.form['XML']
+		print "DATA ARGS: ", type(request.data)
+		print "XML all: ", request.data['XML']
 
 		print "verifying soup works---------"
-		soup = BeautifulSoup(request.form['XML'], "html.parser")
+		# soup = BeautifulSoup(request.form['XML'], "html.parser")
+		soup = BeautifulSoup(request.data['XML'], "html.parser")
 		print "true or false: ", soup.gvisms
 		print "Verify: ", soup.gvisms != None
 		print "Second: ", soup.gvisms == None
@@ -77,19 +81,14 @@ def start():
 			headers = {'Content-Type': 'application/xml'}
 			r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
 			print "Status code: ", r.status_code
-			#post back to server
 
-			return "Response received" #Is this sent back as a POST or what kind of message?
+			return "Response received"
 
-		# elif 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']:
 		elif soup.responseType != None:
 			print "gvismsresponse"
-			# responseText = xmltodict.parse(request.form)['gviSmsResponse']
 			replyMsg = soup.response.string
 			cellNumber = soup.msisdn.string
 
-			# replyMsg = responseText['response']
-			# cellphoneNum = responseText['recipient']['msisdn']
 			print "REPLY MESSAGE", replyMsg
 			print "CELLNUM: ", cellNumber
 			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
@@ -121,16 +120,21 @@ def start():
 		else:
 			print "THIS IS THE ELSE STATEMENT. SOUP IS NONE. TRYING ANOTHER METHOD"
 			print "---------"
-			print "xmltodict true or false: ", 'gviSms' in xmltodict.parse(request.form)
-			print "replymessage maybe?: ", 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']
-			print "all xmltodict: ", xmltodict.parse(request.form)
-			answer = alternativeMethod(request.form)
+			# print "xmltodict true or false: ", 'gviSms' in xmltodict.parse(request.form)
+			# print "replymessage maybe?: ", 'reply' in xmltodict.parse(request.form)['gviSmsResponse']['responseType']
+			# print "all xmltodict: ", xmltodict.parse(request.form)
+			# answer = alternativeMethod(request.form)
+			print "xmltodict true or false: ", 'gviSms' in xmltodict.parse(request.data)
+			print "replymessage maybe?: ", 'reply' in xmltodict.parse(request.data)['gviSmsResponse']['responseType']
+			print "all xmltodict: ", xmltodict.parse(request.data)
+			answer = alternativeMethod(request.data)
 			print "ANSWER?: ", answer
 			if answer == "Response received":
 				pass
 			else:
 				print "THIS IS THE LAST ATTEMPT. STRING PARSE METHOD"
-				lastattempt = stringParse(request.form)
+				# lastattempt = stringParse(request.form)
+				lastattempt = stringParse(request.data)
 				if lastattempt == "Response received":
 					pass
 				else:
@@ -184,9 +188,8 @@ def alternativeMethod(xmlText):
 		headers = {'Content-Type': 'application/xml'}
 		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
 		print "Status code: ", r.status_code
-		#post back to server
 
-		return "Response received" #Is this sent back as a POST or what kind of message?
+		return "Response received"
 
 	elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
 		responseText = xmltodict.parse(xmlText)['gviSmsResponse']
@@ -220,7 +223,6 @@ def alternativeMethod(xmlText):
 
 		print "Response text. No needed effort unless error or reply"
 		return "Thank you for the response message."
-		#what to do if error or reply messagae? Error handling...
 	else:
 		print "KEYS: ", xmltodict.parse(xmlText).keys()
 		return "Response received"
@@ -228,49 +230,49 @@ def alternativeMethod(xmlText):
 def stringParse(text):
 	parse = str.split(">")
 	print "PARSE: ", parse
+	whichMessage = ""
 
 	for word in range(len(parse)):
-		whichMessage = ""
 
-		if (parse == "<gvisms") | (parse == "gviSms"):
+		if (parse[word] == "<gvisms") | (parse[word] == "<gviSms"):
 			whichMessage = "gvisms"
 			print "This is a gvisms message"
-			# for word in range(len(parse)):
-			if parse[word] == "<cellNumber":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				cellNumber = s[0]
-				print "CellNum: ", cellNumber
-			elif parse[word] == "<content":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				content = s[0]
-				print "Content: ", content
+		elif parse[word] == "<cellNumber":
+			s = parse[word+1].split("<")
+			print "SPLIT WORDS: ", s
+			cellNumber = s[0]
+			print "CellNum: ", cellNumber
+		elif parse[word] == "<content":
+			s = parse[word+1].split("<")
+			print "SPLIT WORDS: ", s
+			content = s[0]
+			print "Content: ", content
 
 
-		elif parse[0][:15] == "<gviSmsResponse":
+		elif parse[word][:15] == "<gviSmsResponse":
 			print "This is a response message"
 			whichMessage = "gvismsresponse"
-			if parse[word] == "<responseType":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				print "responseType: ", s[0]
-				resType = s[0]
-				if (resType == "error") | (resType == "receipt"):
-					print "Received an error or receipt response message. Breaking"
-					break
-			elif parse[word] == "<msisdn":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				cellNumber = s[0]
-				print "cellNum: ", cellNumber
-			elif parse[word] == "<response":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				replyMsg = s[0]
-				print "message: ", replyMsg
+		elif parse[word] == "<responseType":
+			s = parse[word+1].split("<")
+			print "SPLIT WORDS: ", s
+			print "responseType: ", s[0]
+			resType = s[0]
+			if (resType == "error") | (resType == "receipt"):
+				print "Received an error or receipt response message. Breaking"
+				break
+		elif parse[word] == "<msisdn":
+			s = parse[word+1].split("<")
+			print "SPLIT WORDS: ", s
+			cellNumber = s[0]
+			print "cellNum: ", cellNumber
+		elif parse[word] == "<response":
+			s = parse[word+1].split("<")
+			print "SPLIT WORDS: ", s
+			replyMsg = s[0]
+			print "message: ", replyMsg
 
 	if whichMessage == "gvisms":
+		print "gvisms whichmessage"
 		print "cellNumber: ", cellNumber
 		print "content: ", content
 
@@ -301,7 +303,8 @@ def stringParse(text):
 
 		return "Response received" #Is this sent back as a POST or what kind of message?
 
-	elif whichMessage == "gvismsresponse":
+	elif (whichMessage == "gvismsresponse") & (resType != "receipt") & (resType != "error"):
+		print "gvismsresponse whichmessage"
 		print "cellNumber: ", cellNumber
 		print "replyMsg: ", replyMsg
 		returnReply = analyzeSMSInfo(cellNumber, replyMsg)

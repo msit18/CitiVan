@@ -86,13 +86,13 @@ def start():
 			print "gvismsresponse"
 			# responseText = xmltodict.parse(request.form)['gviSmsResponse']
 			replyMsg = soup.response.string
-			cellphoneNum = soup.msisdn.string
+			cellNumber = soup.msisdn.string
 
 			# replyMsg = responseText['response']
 			# cellphoneNum = responseText['recipient']['msisdn']
 			print "REPLY MESSAGE", replyMsg
-			print "CELLNUM: ", cellphoneNum
-			returnReply = analyzeSMSInfo(cellphoneNum, replyMsg)
+			print "CELLNUM: ", cellNumber
+			returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 			print "returnReply: ", returnReply
 
 			xmlReplyMessage = \
@@ -108,7 +108,7 @@ def start():
 				            "<msisdn>{1}</msisdn>"\
 				        "</recipient>"\
 				    "</recipientList>"\
-				"</gviSmsMessage>".format(returnReply, cellphoneNum)
+				"</gviSmsMessage>".format(returnReply, cellNumber)
 
 			print "replyXMLMSG: ", xmlReplyMessage
 
@@ -191,10 +191,10 @@ def alternativeMethod(xmlText):
 	elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
 		responseText = xmltodict.parse(xmlText)['gviSmsResponse']
 		replyMsg = responseText['response']
-		cellphoneNum = responseText['recipient']['msisdn']
+		cellNumber = responseText['recipient']['msisdn']
 		print "REPLY MESSAGE", replyMsg
 		print "CELLNUM: ", cellphoneNum
-		returnReply = analyzeSMSInfo(cellphoneNum, replyMsg)
+		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 		print "returnReply: ", returnReply
 
 		xmlReplyMessage = \
@@ -210,7 +210,7 @@ def alternativeMethod(xmlText):
 			            "<msisdn>{1}</msisdn>"\
 			        "</recipient>"\
 			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnReply, cellphoneNum)
+			"</gviSmsMessage>".format(returnReply, cellNumber)
 
 		print "replyXMLMSG: ", xmlReplyMessage
 
@@ -229,21 +229,53 @@ def stringParse(text):
 	parse = str.split(">")
 	print "PARSE: ", parse
 
-	if (parse[0] == "<gvisms") | (parse[0] == "gviSms"):
-		print "This is a gvisms message"
-		for word in range(len(parse)):
+	for word in range(len(parse)):
+		whichMessage = ""
+
+		if (parse == "<gvisms") | (parse == "gviSms"):
+			whichMessage = "gvisms"
+			print "This is a gvisms message"
+			# for word in range(len(parse)):
 			if parse[word] == "<cellNumber":
 				s = parse[word+1].split("<")
 				print "SPLIT WORDS: ", s
-				cellNum = s[0]
-				print "CellNum: ", cellNum
+				cellNumber = s[0]
+				print "CellNum: ", cellNumber
 			elif parse[word] == "<content":
 				s = parse[word+1].split("<")
 				print "SPLIT WORDS: ", s
-				msg = s[0]
-				print "Content: ", msg
-		returnReply = analyzeSMSInfo(cellNum, msg)
-		print "returnReply: ", returnReply
+				content = s[0]
+				print "Content: ", content
+
+
+		elif parse[0][:15] == "<gviSmsResponse":
+			print "This is a response message"
+			whichMessage = "gvismsresponse"
+			if parse[word] == "<responseType":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				print "responseType: ", s[0]
+				resType = s[0]
+				if (resType == "error") | (resType == "receipt"):
+					print "Received an error or receipt response message. Breaking"
+					break
+			elif parse[word] == "<msisdn":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				cellNumber = s[0]
+				print "cellNum: ", cellNumber
+			elif parse[word] == "<response":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				replyMsg = s[0]
+				print "message: ", replyMsg
+
+	if whichMessage == "gvisms":
+		print "cellNumber: ", cellNumber
+		print "content: ", content
+
+		returnVal = analyzeSMSInfo(cellNumber, content)
+		print "returnVal: ", returnVal
 
 		xmlMessage = \
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
@@ -258,7 +290,7 @@ def stringParse(text):
 			            "<msisdn>{1}</msisdn>"\
 			        "</recipient>"\
 			    "</recipientList>"\
-			"</gviSmsMessage>".format(msg, cellNum)
+			"</gviSmsMessage>".format(returnVal, cellNumber)
 
 		print xmlMessage
 
@@ -269,31 +301,10 @@ def stringParse(text):
 
 		return "Response received" #Is this sent back as a POST or what kind of message?
 
-
-	elif parse[0][:15] == "<gviSmsResponse":
-		print "This is a response message"
-		for word in range(len(parse)):
-			if parse[word] == "<responseType":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				print "responseType: ", s[0]
-				resType = s[0]
-				if (resType == "error") | (resType == "receipt"):
-					print "Received an error or receipt response message. Breaking"
-					break
-			elif parse[word] == "<msisdn":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				cellNum = s[0]
-				print "cellNum: ", cellNum
-			elif parse[word] == "<response":
-				s = parse[word+1].split("<")
-				print "SPLIT WORDS: ", s
-				msg = s[0]
-				print "message: ", msg
-
-
-		returnReply = analyzeSMSInfo(cellNum, msg)
+	elif whichMessage == "gvismsresponse":
+		print "cellNumber: ", cellNumber
+		print "replyMsg: ", replyMsg
+		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
 
 		xmlReplyMessage = \
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
@@ -308,7 +319,7 @@ def stringParse(text):
 			            "<msisdn>{1}</msisdn>"\
 			        "</recipient>"\
 			    "</recipientList>"\
-			"</gviSmsMessage>".format(returnReply, cellNum)
+			"</gviSmsMessage>".format(returnReply, cellNumber)
 
 		print "replyXMLMSG: ", xmlReplyMessage
 

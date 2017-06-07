@@ -78,21 +78,108 @@ elif parse[0][:15] == "<gviSmsResponse":
 
 
 
-# for fragment in range(len(parse)):
-# 	if parse[fragment] == "<msisdn":
-# 		s = parse[fragment+1].split("<")
-# 		print "S: ", s
-# 		print "cellNum: ", s[0]
-# 	elif parse[fragment][:15] == "<gviSmsResponse":
-# 		print "This is a response message"
-# 	elif parse[fragment] == "<responseType":
-# 		s = parse[fragment+1].split("<")
-# 		print "S: ", s
-# 		print "responseType: ", s[0]
-# 	elif parse[fragment] == "<response":
-# 		s = parse[fragment+1].split("<")
-# 		print "S: ", s
-# 		print "message: ", s[0]
-# 	elif parse[fragment] == "<gviSms":
-# 		print "This is a first pass message"
-# 	elif parse[fragment] == ""
+
+
+	parse = str.split(">")
+	print "PARSE: ", parse
+
+	for word in range(len(parse)):
+		whichMessage = ""
+
+		if (parse == "<gvisms") | (parse == "gviSms"):
+			whichMessage = "gvisms"
+			print "This is a gvisms message"
+			# for word in range(len(parse)):
+			if parse[word] == "<cellNumber":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				cellNumber = s[0]
+				print "CellNum: ", cellNumber
+			elif parse[word] == "<content":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				content = s[0]
+				print "Content: ", content
+
+
+		elif parse[0][:15] == "<gviSmsResponse":
+			print "This is a response message"
+			whichMessage = "gvismsresponse"
+			if parse[word] == "<responseType":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				print "responseType: ", s[0]
+				resType = s[0]
+				if (resType == "error") | (resType == "receipt"):
+					print "Received an error or receipt response message. Breaking"
+					break
+			elif parse[word] == "<msisdn":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				cellNumber = s[0]
+				print "cellNum: ", cellNumber
+			elif parse[word] == "<response":
+				s = parse[word+1].split("<")
+				print "SPLIT WORDS: ", s
+				replyMsg = s[0]
+				print "message: ", replyMsg
+
+	if whichMessage == "gvisms":
+		print "cellNumber: ", cellNumber
+		print "content: ", content
+
+		returnVal = analyzeSMSInfo(cellNumber, content)
+		print "returnVal: ", returnVal
+
+		xmlMessage = \
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
+			"<gviSmsMessage>"\
+			    "<affiliateCode>CIT003-485</affiliateCode>"\
+			    "<authenticationCode>19070017</authenticationCode>"\
+			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
+			    "<messageType>text</messageType>"\
+			    "<recipientList>"\
+			        "<message>{0}</message>"\
+			        "<recipient>"\
+			            "<msisdn>{1}</msisdn>"\
+			        "</recipient>"\
+			    "</recipientList>"\
+			"</gviSmsMessage>".format(returnVal, cellNumber)
+
+		print xmlMessage
+
+		headers = {'Content-Type': 'application/xml'}
+		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
+		print "Status code: ", r.status_code
+		#post back to server
+
+		return "Response received" #Is this sent back as a POST or what kind of message?
+
+	elif whichMessage == "gvismsresponse":
+		print "cellNumber: ", cellNumber
+		print "replyMsg: ", replyMs
+		returnReply = analyzeSMSInfo(cellNumber, replyMsg)
+
+		xmlReplyMessage = \
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
+			"<gviSmsMessage>"\
+			    "<affiliateCode>CIT003-485</affiliateCode>"\
+			    "<authenticationCode>19070017</authenticationCode>"\
+			    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
+			    "<messageType>text</messageType>"\
+			    "<recipientList>"\
+			        "<message>{0}</message>"\
+			        "<recipient>"\
+			            "<msisdn>{1}</msisdn>"\
+			        "</recipient>"\
+			    "</recipientList>"\
+			"</gviSmsMessage>".format(returnReply, cellNumber)
+
+		print "replyXMLMSG: ", xmlReplyMessage
+
+		headers = {'Content-Type': 'application/xml'}
+		r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlReplyMessage, headers=headers)
+		print "Status code: ", r.status_code
+
+		print "Response text. No needed effort unless error or reply"
+		return "Response received"

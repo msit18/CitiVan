@@ -240,6 +240,11 @@ def stringParse(text):
 			replyMsg = s[0]
 			print "message: ", replyMsg
 
+	print "cellNumber?: ", cellNumber
+	print "resType?: ", resType
+	print "Message?: ", content
+	print "replyMsg?: ", replyMsg
+	print "whichMessage?: ", whichMessage
 	# try:
 	if whichMessage == "gvisms":
 		print "gvisms whichmessage"

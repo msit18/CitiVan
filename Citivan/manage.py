@@ -169,8 +169,9 @@ def xmltodictMethod(xmlText):
 			print "Response text. No needed effort unless error or reply"
 			return "success"
 
-		elif ('error' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']):
-			print "GRAPEVINE SERVER IS SENDING AN ERROR BACK TO THIS SERVER."
+		elif ('error' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']) | 
+			('receipt' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']):
+			print "GRAPEVINE SERVER IS SENDING AN ERROR OR RECEIPT BACK TO THIS SERVER."
 			return "success"
 
 		else:

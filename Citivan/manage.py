@@ -2,6 +2,7 @@ from flask import request, Response
 from Citivan import app
 import xmltodict
 import requests
+import datetime
 
 from bs4 import BeautifulSoup
 
@@ -30,8 +31,9 @@ def start():
 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. TESTER METHOD"
 	elif request.method == 'POST':
 		print "XML all: ", request.form['XML']
-		# tryStrParseMethod = stringParse(request.form['XML'])
-		sendXMLBack("thanks", "27843314887")
+		tryStrParseMethod = stringParse(request.form['XML'])
+		# sendXMLBack("thanks", "27843314887")
+		return "Response received"
 
 # def start():
 # 	if request.method == 'GET':
@@ -72,12 +74,13 @@ def analyzeSMSInfo(ID, msg):
 	return s.main(ID, msg)
 
 def sendXMLBack (sendBackMessage, cellNumber):
+	sendTime = datetime.datetime.today().strftime('%Y-%m-%dT%H:%M:%S')
 	xmlMessage = \
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"\
 		"<gviSmsMessage>"\
 		    "<affiliateCode>CIT003-485</affiliateCode>"\
 		    "<authenticationCode>19070017</authenticationCode>"\
-		    "<submitDateTime>yyyy-MM-ddTHH:mm:ss</submitDateTime>"\
+		    "<submitDateTime>{2}</submitDateTime>"\
 		    "<messageType>text</messageType>"\
 		    "<recipientList>"\
 		        "<message>{0}</message>"\
@@ -85,7 +88,8 @@ def sendXMLBack (sendBackMessage, cellNumber):
 		            "<msisdn>{1}</msisdn>"\
 		        "</recipient>"\
 		    "</recipientList>"\
-		"</gviSmsMessage>".format(sendBackMessage, cellNumber)
+		# "</gviSmsMessage>".format(sendBackMessage, cellNumber, sendTime)
+		"</gviSmsMessage>".format("thanks", cellNumber, sendTime)
 	print xmlMessage
 
 	headers = {'Content-Type': 'application/xml'}

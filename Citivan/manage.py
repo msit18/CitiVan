@@ -80,16 +80,16 @@ def sendXMLBack (sendBackMessage, cellNumber):
 		"<gviSmsMessage>"\
 		    "<affiliateCode>CIT003-485</affiliateCode>"\
 		    "<authenticationCode>19070017</authenticationCode>"\
-		    "<submitDateTime>{2}</submitDateTime>"\
+		    "<submitDateTime>{1}</submitDateTime>"\
 		    "<messageType>text</messageType>"\
 		    "<recipientList>"\
-		        "<message>{0}</message>"\
+		        "<message>Thanks</message>"\
 		        "<recipient>"\
-		            "<msisdn>{1}</msisdn>"\
+		            "<msisdn>{0}</msisdn>"\
 		        "</recipient>"\
 		    "</recipientList>"\
 		# "</gviSmsMessage>".format(sendBackMessage, cellNumber, sendTime)
-		"</gviSmsMessage>".format("thanks", cellNumber, sendTime)
+		"</gviSmsMessage>".format(cellNumber, sendTime)
 	print xmlMessage
 
 	headers = {'Content-Type': 'application/xml'}

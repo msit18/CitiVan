@@ -50,9 +50,9 @@ def start():
 				if tryStrParseMethod == "error":
 					print "ERROR. COULD NOT PROCESS THIS REQUEST"
 					print "END OF LOGS"
-					return "ERROR. COULD NOT PROCESS THIS REQUEST"
+					# return "ERROR. COULD NOT PROCESS THIS REQUEST"
 		print "END OF LOGS. SOME SUCCESS"
-		return "Response received"
+		# return "Response received"
 
 	else:
 		return "This page does not exist!"
@@ -82,6 +82,7 @@ def sendXMLBack (sendBackMessage, cellNumber):
 	headers = {'Content-Type': 'application/xml'}
 	r = requests.post('http://bms27.vine.co.za/httpInputhandler/ApplinkUpload', data=xmlMessage, headers=headers)
 	print "Status code: ", r.status_code
+	return r
 
 def soupMethod(xmlText):
 	print "verifying soup works---------"

@@ -130,13 +130,13 @@ def start():
 			answer = alternativeMethod(request.data)
 			print "ANSWER?: ", answer
 			if answer == "Response received":
-				pass
+				return "Response received"
 			else:
 				print "THIS IS THE LAST ATTEMPT. STRING PARSE METHOD"
 				# lastattempt = stringParse(request.form)
 				lastattempt = stringParse(request.data)
 				if lastattempt == "Response received":
-					pass
+					return "Response received"
 				else:
 					print "THAT WAS THE LAST STRAW. CANNOT WORK"
 					return "THERE WAS AN ERROR"

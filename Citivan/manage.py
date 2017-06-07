@@ -134,7 +134,6 @@ def soupMethod(xmlText):
 
 def xmltodictMethod(xmlText):
 	print "XML text: ", xmlText
-	print "find keys: ", xmltodict.parse(xmlText)
 	# try:
 	if 'gviSms' in xmltodict.parse(xmlText):
 		print "GVISMS IF STATEMENT"

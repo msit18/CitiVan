@@ -222,7 +222,7 @@ def alternativeMethod(xmlText):
 		print "Status code: ", r.status_code
 
 		print "Response text. No needed effort unless error or reply"
-		return "Thank you for the response message."
+		return "Response received"
 	else:
 		print "KEYS: ", xmltodict.parse(xmlText).keys()
 		return "Response received"

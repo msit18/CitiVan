@@ -29,7 +29,7 @@ def start():
 		print "END OF LOGS"
 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. UPDATE 06/06 9:54"
 	elif request.method == 'POST':
-		print "HEADERS", request.headers
+		# print "HEADERS", request.headers
 		print "REQ_path", request.path
 		print "ARGS",request.args
 		print "DATA",request.data

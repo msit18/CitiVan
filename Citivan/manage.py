@@ -27,35 +27,44 @@ def login():
 def start():
 	if request.method == 'GET':
 		print "END OF LOGS"
-		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. UPDATE 06/06 9:54"
+		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. TESTER METHOD"
 	elif request.method == 'POST':
-		# print "HEADERS", request.headers
-		print "REQ_path", request.path
-		print "ARGS",request.args
-		print "DATA",request.data
-		print "FORM",request.form
-		print "DATA ARGS: ", type(request.form)
 		print "XML all: ", request.form['XML']
+		# tryStrParseMethod = stringParse(request.form['XML'])
+		sendXMLBack("thanks", "27843314887")
 
-		print "try the various methods---------"
+# def start():
+# 	if request.method == 'GET':
+# 		print "END OF LOGS"
+# 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. UPDATE 06/06 9:54"
+# 	elif request.method == 'POST':
+# 		# print "HEADERS", request.headers
+# 		print "REQ_path", request.path
+# 		print "ARGS",request.args
+# 		print "DATA",request.data
+# 		print "FORM",request.form
+# 		print "DATA ARGS: ", type(request.form)
+# 		print "XML all: ", request.form['XML']
 
-		trySoupMethod = soupMethod(request.form['XML'])
-		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
-		if trySoupMethod == "error":
-			tryXMLMethod = xmltodictMethod(request.form['XML'])
-			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
-			if tryXMLMethod == "error":
-				tryStrParseMethod = stringParse(request.form['XML'])
-				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
-				if tryStrParseMethod == "error":
-					print "ERROR. COULD NOT PROCESS THIS REQUEST"
-					print "END OF LOGS"
-					return "ERROR. COULD NOT PROCESS THIS REQUEST"
-		print "END OF LOGS. SOME SUCCESS"
-		return "Response received"
+# 		print "try the various methods---------"
 
-	else:
-		return "This page does not exist!"
+# 		trySoupMethod = soupMethod(request.form['XML'])
+# 		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
+# 		if trySoupMethod == "error":
+# 			tryXMLMethod = xmltodictMethod(request.form['XML'])
+# 			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
+# 			if tryXMLMethod == "error":
+# 				tryStrParseMethod = stringParse(request.form['XML'])
+# 				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
+# 				if tryStrParseMethod == "error":
+# 					print "ERROR. COULD NOT PROCESS THIS REQUEST"
+# 					print "END OF LOGS"
+# 					return "ERROR. COULD NOT PROCESS THIS REQUEST"
+# 		print "END OF LOGS. SOME SUCCESS"
+# 		return "Response received"
+
+# 	else:
+# 		return "This page does not exist!"
 
 def analyzeSMSInfo(ID, msg):
 	s = Server()
@@ -132,8 +141,9 @@ def soupMethod(xmlText):
 		return "error"
 
 def xmltodictMethod(xmlText):
-	print "XML text: ", xmlText
+	# print "XML text: ", xmlText
 	# try:
+	print "XMLTODICT METHOD START. WILL TRY TO WORK"
 	if 'gviSms' in xmltodict.parse(xmlText):
 		print "GVISMS IF STATEMENT"
 		obj = xmltodict.parse(xmlText)['gviSms']
@@ -149,10 +159,10 @@ def xmltodictMethod(xmlText):
 
 		print "SENDING XML MESSAGE BACK"
 		sendXMLBack(returnVal, cellNumber)
-
 		return "success"
 
 	elif 'reply' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']:
+		print "GVISMSRESPONSE IF STATEMENT"
 		responseText = xmltodict.parse(xmlText)['gviSmsResponse']
 		replyMsg = responseText['response']
 		cellNumber = responseText['recipient']['msisdn']
@@ -180,7 +190,7 @@ def xmltodictMethod(xmlText):
 	# 	return "error"
 
 def stringParse(text):
-	print "stringParse received this: ", text
+	# print "stringParse received this: ", text
 	parse = text.split(">")
 	print "PARSE: ", parse
 	whichMessage = ""

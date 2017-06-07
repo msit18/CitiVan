@@ -140,6 +140,7 @@ def start():
 				else:
 					print "THAT WAS THE LAST STRAW. CANNOT WORK"
 					return "THERE WAS AN ERROR"
+	print "END OF LOGS"
 
 
 	else:

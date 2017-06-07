@@ -40,13 +40,16 @@ def start():
 		print "XML all: ", request.data
 
 		print "try the various methods---------"
-		tryMethod = soupMethod(request.form)
+		# tryMethod = soupMethod(request.form)
+		tryMethod = soupMethod(request.data)
 		print "TRYMETHOD RESULT: ", tryMethod
 		if tryMethod == "error":
-			tryMethod = xmltodictMethod(request.form)
+			# tryMethod = xmltodictMethod(request.form)
+			tryMethod = xmltodictMethod(request.data)
 			print "TRYMETHOD RESULT: ", tryMethod
 			if tryMethod == "error":
-				tryMethod = stringParse(request.form)
+				# tryMethod = stringParse(request.form)
+				tryMethod = stringParse(request.data)
 				print "TRYMETHOD RESULT: ", tryMethod
 				print "ERROR. COULD NOT PROCESS THIS REQUEST"
 				return "ERROR. COULE NOT PROCESS THIS REQUEST."

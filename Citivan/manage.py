@@ -1,3 +1,6 @@
+#Written by Michelle Sit
+#For the Cape Town SMS project
+
 from flask import request, Response
 from Citivan import app
 import xmltodict
@@ -32,7 +35,6 @@ def start():
 	elif request.method == 'POST':
 		print "XML all: ", request.form['XML']
 		tryStrParseMethod = stringParse(request.form['XML'])
-		# sendXMLBack("thanks", "27843314887")
 		return "Response received"
 
 # def start():

@@ -168,6 +168,14 @@ def xmltodictMethod(xmlText):
 
 			print "Response text. No needed effort unless error or reply"
 			return "success"
+
+		elif ('error' in xmltodict.parse(xmlText)['gviSmsResponse']['responseType']):
+			print "GRAPEVINE SERVER IS SENDING AN ERROR BACK TO THIS SERVER."
+			return "success"
+
+		else:
+			print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
+			return "error"
 	except:
 		print "KEYS: ", xmltodict.parse(xmlText)
 		print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
@@ -243,6 +251,10 @@ def stringParse(text):
 
 			print "Response text. No needed effort unless error or reply"
 			return "success"
+
+		else:
+			print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
+			return "error"
 	except:
 		print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
 		return "error"

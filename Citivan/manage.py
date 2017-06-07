@@ -37,11 +37,11 @@ def start():
 		# print "XML all: ", request.form['XML']
 		print "FORM",request.form
 		print "DATA ARGS: ", type(request.data)
-		print "XML all: ", request.data['XML']
+		print "XML all: ", request.data
 
 		print "verifying soup works---------"
 		# soup = BeautifulSoup(request.form['XML'], "html.parser")
-		soup = BeautifulSoup(request.data['XML'], "html.parser")
+		soup = BeautifulSoup(request.data, "html.parser")
 		print "true or false: ", soup.gvisms
 		print "Verify: ", soup.gvisms != None
 		print "Second: ", soup.gvisms == None

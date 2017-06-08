@@ -28,47 +28,47 @@ def login():
 
 
 @app.route('/xmlPage', methods=['GET', 'POST'])
-def start():
-	if request.method == 'GET':
-		print "END OF LOGS"
-		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. TESTER METHOD"
-	elif request.method == 'POST':
-		print "XML all: ", request.form['XML']
-		tryStrParseMethod = stringParse(request.form['XML'])
-		return "Response received"
-
 # def start():
 # 	if request.method == 'GET':
 # 		print "END OF LOGS"
-# 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. UPDATE 06/06 9:54"
+# 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. TESTER METHOD"
 # 	elif request.method == 'POST':
-# 		# print "HEADERS", request.headers
-# 		print "REQ_path", request.path
-# 		print "ARGS",request.args
-# 		print "DATA",request.data
-# 		print "FORM",request.form
-# 		print "DATA ARGS: ", type(request.form)
 # 		print "XML all: ", request.form['XML']
-
-# 		print "try the various methods---------"
-
-# 		trySoupMethod = soupMethod(request.form['XML'])
-# 		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
-# 		if trySoupMethod == "error":
-# 			tryXMLMethod = xmltodictMethod(request.form['XML'])
-# 			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
-# 			if tryXMLMethod == "error":
-# 				tryStrParseMethod = stringParse(request.form['XML'])
-# 				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
-# 				if tryStrParseMethod == "error":
-# 					print "ERROR. COULD NOT PROCESS THIS REQUEST"
-# 					print "END OF LOGS"
-# 					return "ERROR. COULD NOT PROCESS THIS REQUEST"
-# 		print "END OF LOGS. SOME SUCCESS"
+# 		tryStrParseMethod = stringParse(request.form['XML'])
 # 		return "Response received"
 
-# 	else:
-# 		return "This page does not exist!"
+def start():
+	if request.method == 'GET':
+		print "END OF LOGS"
+		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. UPDATE 06/06 9:54"
+	elif request.method == 'POST':
+		# print "HEADERS", request.headers
+		print "REQ_path", request.path
+		print "ARGS",request.args
+		print "DATA",request.data
+		print "FORM",request.form
+		print "DATA ARGS: ", type(request.form)
+		print "XML all: ", request.form['XML']
+
+		print "try the various methods---------"
+
+		trySoupMethod = soupMethod(request.form['XML'])
+		print "SOUP TRYMETHOD RESULT: ", trySoupMethod
+		if trySoupMethod == "error":
+			tryXMLMethod = xmltodictMethod(request.form['XML'])
+			print "XMLTODICT TRYMETHOD RESULT: ", tryXMLMethod
+			if tryXMLMethod == "error":
+				tryStrParseMethod = stringParse(request.form['XML'])
+				print "STRPARSE TRYMETHOD RESULT: ", tryStrParseMethod
+				if tryStrParseMethod == "error":
+					print "ERROR. COULD NOT PROCESS THIS REQUEST"
+					print "END OF LOGS"
+					return "ERROR. COULD NOT PROCESS THIS REQUEST"
+		print "END OF LOGS. SOME SUCCESS"
+		return "Response received"
+
+	else:
+		return "This page does not exist!"
 
 def analyzeSMSInfo(ID, msg):
 	s = Server()
@@ -82,16 +82,16 @@ def sendXMLBack (sendBackMessage, cellNumber):
 		"<gviSmsMessage>"\
 		    "<affiliateCode>CIT003-485</affiliateCode>"\
 		    "<authenticationCode>19070017</authenticationCode>"\
-		    "<submitDateTime>{1}</submitDateTime>"\
+		    "<submitDateTime>{2}</submitDateTime>"\
 		    "<messageType>text</messageType>"\
 		    "<recipientList>"\
-		        "<message>Thanks</message>"\
+		        "<message>{0}</message>"\
 		        "<recipient>"\
-		            "<msisdn>{0}</msisdn>"\
+		            "<msisdn>{1}</msisdn>"\
 		        "</recipient>"\
 		    "</recipientList>"\
-		"</gviSmsMessage>".format(cellNumber, sendTime)
-		# "</gviSmsMessage>".format(sendBackMessage, cellNumber, sendTime)
+		"</gviSmsMessage>".format(sendBackMessage, cellNumber, sendTime)
+		# "</gviSmsMessage>".format(cellNumber, sendTime)
 	print xmlMessage
 
 	headers = {'Content-Type': 'application/xml'}

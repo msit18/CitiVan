@@ -32,7 +32,7 @@ class Server:
 		print "\n\nCELLPHONE TEXT: "
 		if status <= 1:
 			sendBack = "Welcome to CitiVan! Please answer the following questions."\
-						" To see the ratings of a van, send \"rate VanNumber\"\n{0}"\
+						" To see a van's rating, send \"rate (last four digits of license)\"\n{0}"\
 						.format(cf.questions[0])
 		elif isinstance(status, int)==False:
 			splitMsg = status.split("@@")
@@ -40,6 +40,7 @@ class Server:
 			sendBack = "{0}\n{1}".format(splitMsg[0], splitMsg[1])
 		else:
 			sendBack = cf.questions[status-1]
+		print "----------------------"
 		print "SEND BACK MSG: ", sendBack
 		return sendBack
 
@@ -107,12 +108,19 @@ class CitivanSMS:
 	def getBusName(self, userText, surveyNum):
 		print "getBusName Method"
 		busName = self.json[self.callerID][str(surveyNum)]["1"]
+		print "busName is number?: ", isinstance(busName, int)
+		try:
+			print "Checking length of busname: ", len(busName)
+			intBusName = busName
+		except:
+			print "BusName is a 0 I think: ", busName
+			intBusName = 0
 		print "BUSNAME VALUE: ", busName
 		if busName == 0:
 			print "BUS NAME IS NOT ENTERED"
 			busName = userText
-			print str(busName) not in self.busJson
-			if (str(busName) not in self.busJson) & (str(userText) != "rate"):
+			print "Not in busJSon?: ", str(busName) not in self.busJson
+			if (str(busName) not in self.busJson) & (str(userText) != "rate") & (len(str(userText)) == 4):
 				print "CREATING NEW BUS DATA"
 				self.busJson[str(busName)] = {"1":"{0}".format(userText), "2":0, "3":0, "4":0, "5":0, "6":0,
 										"7":1, "8":0, "9":0, "10":0, "11":0, "12":0}
@@ -121,14 +129,22 @@ class CitivanSMS:
 				r_bus = self.client.r_session.put(end_point_bus, json=busJsonFormat)
 				print "BUS: {0}\n".format(r_bus.json())
 				print "FINISHED WRITING TO DATABASE"
-		return busName
+			else:
+				print "Bus was not created. but double check"
+				print "Bus not equal to rate?: ", (str(userText) != "rate")
+				print "len of bus text was: ", (len(str(userText)) == 4)
+			print "BUSNAME IN THE END: ", busName
+			return busName
+		elif (len(intBusName) < 5):
+			print "Return bus name: ", busName
+			return busName
 
 	def inputDataToCloudant(self, currentConvoNum, userText, surveyNum):
 		print "InputDataToCloudant method"
 		print "CurrentConvoNum for Input: ", currentConvoNum
 		_busName = self.getBusName(userText, surveyNum)
 		print "userText: ", userText
-		print isinstance(userText, int)
+		print "Usertext is number?: ", isinstance(userText, int)
 		try:
 			intUserText = int(userText)
 		except:
@@ -139,12 +155,14 @@ class CitivanSMS:
 		if currentConvoNum == 1:
 			print "FIRST QUESTION. PUTTING BUS NAME INTO THE SYSTEM"
 			print "CHECKING LENGTH OF BUSNAME: ", 3<len(userText)<5
-			if 3<len(userText)<5:
+			if (3<len(userText)<5) & (userText != "rate"):
 				print "BUSNAME IS FOUR CHARACTERS"
 				self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = userText
 				# self.busJson[_busName]["7"] += 1
 				self.json[self.callerID]["convoNum"] += 1
 				self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
+			else:
+				print "userText was rate correct?: ", userText
 		elif (2<=currentConvoNum<=3) & (1<=intUserText<=5):
 			print  "QUESTION TWO OR QUESTION 3. PUTTING IN INFO"
 			self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = intUserText
@@ -164,6 +182,7 @@ class CitivanSMS:
 			self.json[self.callerID]["convoNum"] += 1
 			self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 		else:
+			print "currentConvoNum is greater than 6"
 			pass
 
 
@@ -187,7 +206,8 @@ class CitivanSMS:
 				callerHashInfo = self.json[self.callerID]
 
 				#Creates new survey hash if last is full
-				if (callerHashInfo["convoNum"]>6) & (userTextSplit[0] != "rate") & (len(userTextSplit) > 1):
+				# if (callerHashInfo["convoNum"]>6) & (userTextSplit[0] != "rate"):
+				if (callerHashInfo["convoNum"]>6):
 					print "CREATING NEW SURVEY HASH. LAST SURVEY IS FULL"
 					self.json[self.callerID]["convoNum"] = 1
 					newHash = {"LastSubmitTime":0, "1":0, "2":0, "3":0, "4":0, "5":0, "6":0}
@@ -205,9 +225,14 @@ class CitivanSMS:
 						overrideReturnValue = self.rateBus(userTextSplit[1], currentConvoNum)
 
 					###INPUT TEXT INTO SURVEY
+					# elif (userTextSplit[0] != "rate") & (currentConvoNum > 1):
 					else:
 						print "ELSE STATEMENT"
 						self.inputDataToCloudant(currentConvoNum, userText, surveyNum)
+
+					# ###FILTER OUT ONLY RATE COMMENTS.
+					# else:
+					# 	print "user input was rate. There is no appropriate response. repeating question"
 
 			###NEW USER. Create new account. Disregarded input text.
 			else:
@@ -234,7 +259,7 @@ class CitivanSMS:
 				r = self.client.r_session.put(end_point, json=jsonFormat)
 				print "ENDPT {0}\n".format(r.json())
 
-				if newUser == False:
+				if (newUser == False):
 					print "newUser is False"
 					busJsonFormat = self.busJson
 					end_point_bus = "{0}/citivan/{1}/".format(cf.serviceURL, "busData")
@@ -249,7 +274,9 @@ class CitivanSMS:
 
 # if __name__ == '__main__':
 # 	s = Server()
-# 	s.main('8583807847', 'Rate')
+# 	while True:
+# 		s.main('27843314887', 'boo')
+		# s.main('8583807847', 'boo')
 
 	# questions = ["What are the last four digits of the minibus license plate? (Example: for CA34578, enter 4578).", 
 	# 			"Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",

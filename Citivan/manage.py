@@ -1,5 +1,19 @@
-#Written by Michelle Sit
-#For the Cape Town SMS project
+"""
+
+Written by Michelle Sit.
+
+For the Cape Town SMS project. It takes the incoming XML message from the server,
+parses it, and sends the parsed message to analyzeSMSResponses.py. 
+
+The XML messages come in a specified format from GrapeVine. Please see the Cape
+Town dropbox folder for the reference documents. 
+
+There are three methods below to parse the incoming XML messages. Some of the
+methods work on the xml messages and others do not. Given the difficulty of 
+coordinating server tests with GrapeVine, I would not edit this file unless 
+several tests to test this file's robustness can be completed before a deployment.
+
+"""
 
 from flask import request, Response
 from Citivan import app
@@ -28,14 +42,6 @@ def login():
 
 
 @app.route('/xmlPage', methods=['GET', 'POST'])
-# def start():
-# 	if request.method == 'GET':
-# 		print "END OF LOGS"
-# 		return "GET METHOD FOR XML PAGE. HELLO WORLD FROM SCL. TESTER METHOD"
-# 	elif request.method == 'POST':
-# 		print "XML all: ", request.form['XML']
-# 		tryStrParseMethod = stringParse(request.form['XML'])
-# 		return "Response received"
 
 def start():
 	if request.method == 'GET':
@@ -91,7 +97,6 @@ def sendXMLBack (sendBackMessage, cellNumber):
 		        "</recipient>"\
 		    "</recipientList>"\
 		"</gviSmsMessage>".format(sendBackMessage, cellNumber, sendTime)
-		# "</gviSmsMessage>".format(cellNumber, sendTime)
 	print xmlMessage
 
 	headers = {'Content-Type': 'application/xml'}
@@ -100,7 +105,6 @@ def sendXMLBack (sendBackMessage, cellNumber):
 
 def soupMethod(xmlText):
 	print "verifying soup works---------"
-	# soup = BeautifulSoup(request.form['XML'], "html.parser")
 	soup = BeautifulSoup(xmlText, "html.parser")
 	print "true or false: ", soup.gvisms
 	print "Verify: ", soup.gvisms != None
@@ -147,8 +151,6 @@ def soupMethod(xmlText):
 		return "error"
 
 def xmltodictMethod(xmlText):
-	# print "XML text: ", xmlText
-	# try:
 	print "XMLTODICT METHOD START. WILL TRY TO WORK"
 	if 'gviSms' in xmltodict.parse(xmlText):
 		print "GVISMS IF STATEMENT"
@@ -190,15 +192,9 @@ def xmltodictMethod(xmlText):
 	else:
 		print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
 		return "error"
-	# except:
-	# 	print "KEYS: ", xmltodict.parse(xmlText)
-	# 	print "XMLTODICT DID NOT WORK. TRYING STRING PARSE"
-	# 	return "error"
 
 def stringParse(text):
-	# print "stringParse received this: ", text
 	parse = text.split(">")
-	# print "PARSE: ", parse
 	whichMessage = ""
 
 	for word in range(len(parse)):
@@ -245,7 +241,6 @@ def stringParse(text):
 	print "Message?: ", content
 	print "replyMsg?: ", replyMsg
 	print "whichMessage?: ", whichMessage
-	# try:
 	if whichMessage == "gvisms":
 		print "gvisms whichmessage"
 		print "cellNumber: ", cellNumber
@@ -279,9 +274,6 @@ def stringParse(text):
 	else:
 		print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
 		return "error"
-	# except:
-	# 	print "STRINGPARSE WAS ALSO A FAILURE. CHECK FOR ERRORS. END OF METHOD"
-	# 	return "error"
 
 
 # if __name__ == "__main__":

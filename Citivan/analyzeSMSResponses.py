@@ -1,30 +1,41 @@
-#Code written by Michelle Sit
+"""
 
-#Notes:
-#For Cloudant, you must include the _id and _rev items to write to the online database
+Written by Michelle Sit
 
-#convoNum behaviors - It must never go to 0 otherwise there will be one too many survey items
-#- At 1 = lowest number. input +1
-#- At 5 = input should +1
-#- At 7 = If input, produce new survey set, reset convoNum to 1
+Notes:
+For Cloudant, you must include the _id and _rev items to write to the online database
 
-#Everything in the json starts from 1 instead of 0. This is to improve readability for
-#non-computer science people.
+convoNum behaviors - It must never go to 0 otherwise there will be one too many survey items
+- At 1 = lowest number. input +1
+- At 5 = input should +1
+- At 7 = If input, produce new survey set, reset convoNum to 1
 
-#FIX: EMPTY MESSAGES BEING SENT TO HEROKU WEBSITE
+Everything in the json starts from 1 instead of 0. This is to improve readability for
+non-computer science people.
+
+If the user inputs an incorrect answer, the same question will be sent back to the user.
+This was a feature asked by Ricardo. Adding specialized error messages would be a great
+feature to add.
+
+
+
+"""
 
 from __future__ import division
 from cloudant.client import Cloudant
 from cloudant.result import Result, ResultByKey
 from time import gmtime, strftime
 import config as cf
+import random
 
 class Server:
 	def main (self, participantCellNum, participantMsg):
-		# caller = raw_input("what is your phone number?")
-		# text = raw_input("What is your message? ")
-		caller = str(participantCellNum)
-		text = str(participantMsg)
+		## For testing locally in terminal:
+		caller = raw_input("what is your phone number?")
+		text = raw_input("What is your message? ")
+
+		# caller = str(participantCellNum)
+		# text = str(participantMsg)
 		c = CitivanSMS(caller, cf.client)
 		status = c.runNew(text.lower())
 		print "status: ", status
@@ -63,13 +74,10 @@ class CitivanSMS:
 
 	def calculateAverage(self, inputBusName, questionNum, decimalPlace):
 		print "CalculateAverage method"
-		avg = float()
+		avg = float((self.busJson[str(inputBusName)][str(questionNum)])/ \
+				    (self.busJson[str(inputBusName)][str(questionNum+5)]))
 		if decimalPlace == "percent":
-			avg = (self.busJson[str(inputBusName)][str(questionNum)])/ \
-					(self.busJson[str(inputBusName)][str(questionNum+5)])*100
-		elif decimalPlace == "fiveScale":
-			avg = (self.busJson[str(inputBusName)][str(questionNum)])/ \
-					(self.busJson[str(inputBusName)][str(questionNum+5)])
+			avg = avg*100
 		print "avg: ", avg
 		return round(avg, 1)
 
@@ -158,8 +166,9 @@ class CitivanSMS:
 			if (3<len(userText)<5) & (userText != "rate"):
 				print "BUSNAME IS FOUR CHARACTERS"
 				self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = userText
-				# self.busJson[_busName]["7"] += 1
-				self.json[self.callerID]["convoNum"] += 1
+				self.busJson[_busName]["7"] += 1
+				nextQuestion = self.pickNextSurveyQuestion(surveyNum, currentConvoNum)
+				self.json[self.callerID]["convoNum"] = nextQuestion
 				self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 			else:
 				print "userText was rate correct?: ", userText
@@ -168,7 +177,8 @@ class CitivanSMS:
 			self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = intUserText
 			self.busJson[_busName][strCurrentConvoNum] += intUserText
 			self.busJson[_busName][str(currentConvoNum+6)] += 1
-			self.json[self.callerID]["convoNum"] += 1
+			nextQuestion = self.pickNextSurveyQuestion(surveyNum, currentConvoNum)
+			self.json[self.callerID]["convoNum"] = nextQuestion
 			self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 		elif (currentConvoNum > 3) & ((userText == "yes") | (userText == "no") | (1<=intUserText<=2)):
 			print "QUESTIONS FOUR THROUGH SIX. PUTTING IN INFO"
@@ -179,12 +189,28 @@ class CitivanSMS:
 				self.json[self.callerID][strSurveyNum][strCurrentConvoNum] = "no"
 				#Does not add to busJson question number if the answer is no
 			self.busJson[_busName][str(currentConvoNum+6)] += 1
-			self.json[self.callerID]["convoNum"] += 1
+			nextQuestion = self.pickNextSurveyQuestion(surveyNum, currentConvoNum)
+			self.json[self.callerID]["convoNum"] = nextQuestion
 			self.json[self.callerID][strSurveyNum]["LastSubmitTime"] = strftime("%a, %d %b %Y %H:%M:%S GMT", gmtime())
 		else:
 			print "currentConvoNum is greater than 6"
 			pass
 
+	def pickNextSurveyQuestion(self, surveyNum, currentConvoNum):
+		print "----------------------------------------------------"
+		print "CURRENT CONVONUM: ", self.json[self.callerID]["convoNum"]
+		print "CONVO VAL: ", self.json[self.callerID][str(surveyNum)][str(currentConvoNum)]
+		remainingQuestions = [q for q in range (2,7) if self.json[self.callerID][str(surveyNum)]["{0}".format(q)] == 0 ]
+		print "remaining: ", remainingQuestions
+		if remainingQuestions == []:
+			print "set is empty. Create new survey"
+			return 7
+		else:
+			try:
+				return random.sample(remainingQuestions, 1).pop()
+			except:
+				return int(currentConvoNum) + 1
+		print "----------------------------------------------------"
 
 	###MAIN METHOD
 	def runNew(self, userText):
@@ -193,7 +219,6 @@ class CitivanSMS:
 		print "callerID from runnew: ", self.callerID
 		print "input text: ", userText
 		overrideReturnValue = ""
-		# print "self.json: ", self.json
 		userTextSplit = userText.split()
 		print "USERTEXTSPLIT LEN: ", len(userTextSplit)
 		try:
@@ -206,7 +231,6 @@ class CitivanSMS:
 				callerHashInfo = self.json[self.callerID]
 
 				#Creates new survey hash if last is full
-				# if (callerHashInfo["convoNum"]>6) & (userTextSplit[0] != "rate"):
 				if (callerHashInfo["convoNum"]>6):
 					print "CREATING NEW SURVEY HASH. LAST SURVEY IS FULL"
 					self.json[self.callerID]["convoNum"] = 1
@@ -225,14 +249,9 @@ class CitivanSMS:
 						overrideReturnValue = self.rateBus(userTextSplit[1], currentConvoNum)
 
 					###INPUT TEXT INTO SURVEY
-					# elif (userTextSplit[0] != "rate") & (currentConvoNum > 1):
 					else:
 						print "ELSE STATEMENT"
 						self.inputDataToCloudant(currentConvoNum, userText, surveyNum)
-
-					# ###FILTER OUT ONLY RATE COMMENTS.
-					# else:
-					# 	print "user input was rate. There is no appropriate response. repeating question"
 
 			###NEW USER. Create new account. Disregarded input text.
 			else:
@@ -272,41 +291,7 @@ class CitivanSMS:
 
 		return returnValue
 
-# if __name__ == '__main__':
-# 	s = Server()
-# 	while True:
-# 		s.main('27843314887', 'boo')
-		# s.main('8583807847', 'boo')
-
-	# questions = ["What are the last four digits of the minibus license plate? (Example: for CA34578, enter 4578).", 
-	# 			"Pick a number from 1 to 5 to rate the quality of your ride. 1) Very poor. 2) Poor. 3) Average. 4) Good. 5) Excellent.",
-	# 			"Rate from 1 to 5, how comfortable you are in the vehicle? 1) Very Uncomfortable 2) Uncomfortable 3) Average 4) Good 5) Very Comfortable",
-	# 			"Does the driver drive safely? Enter 1 for yes or 2 for no.",
-	# 			"Was your driver courteous? Enter 1 for yes or 2 for no.", 
-	# 			"Do you feel safe in this vehicle? Enter 1 for yes or 2 for no.", 
-	# 			"Thank you for your responses! Have a great day."]
-
-	# cloudantUsername = "citivan"
-	# cloudantPassword = "CityVan1"
-	# serviceURL = "https://citivan.cloudant.com"
-	# client = Cloudant(cloudantUsername, cloudantPassword, url=serviceURL,\
-	# 				connect=True, auto_renew=True)
-
-	# # caller = 123456
-	# # text = raw_input("What is your message? ")
-	# # c = CitivanSMS(caller, client)
-	# main()
-	# status = c.runNew(text.lower())
-	# print "STATUS TYPE: ", type(status)
-	# print "\n\nCELLPHONE TEXT: "
-	# if status <= 1:
-	# 	print "Welcome to CitiVan! Please answer the following questions. To see the ratings of a van, send \"rate VanNumber\" \n"
-	# 	print questions[0]
-	# elif isinstance(status, int)==False:
-	# 	splitMsg = status.split("@@")
-	# 	print splitMsg[0]
-	# 	print "\nsplit here \n"
-	# 	print splitMsg[1]
-	# else:
-	# 	print questions[status-1]
-	# print "END OF CELLPHONE TEXT"
+if __name__ == '__main__':
+	s = Server()
+	while True:
+		s.main('8583807847', 'boo')

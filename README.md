@@ -1,6 +1,9 @@
 # CitiVan
 
-MIT Senseable City Lab collaboration with the City of Cape Town’s Transport and Urban Development Authority (TDA). These files are used on the Heroku server:
+MIT Senseable City Lab collaboration with the City of Cape Town’s Transport and Urban Development Authority (TDA). This github contains all the files that are pushed to the Heroku server. For instructions on how to push these files to the Heroku server, see the Possibly Useful Links section below.
+
+
+These files are used on the Heroku server:
 
 - requirements.txt: Add library names to this file to add them to the app. You may need to download these libraries on your machine if you would like to run the server locally (see below).
 - CitiVan/analyzeSMSResponses.py: analyzes the parsed text from the SMS messages. Returns the appropriate response.
@@ -22,7 +25,14 @@ MIT Senseable City Lab collaboration with the City of Cape Town’s Transport an
 - Flask documentation: http://flask.pocoo.org/docs/0.12/quickstart/#a-minimal-application
 - Requests documentation: http://docs.python-requests.org/en/latest/user/quickstart/
 
+**Overview of the analyzeSMSResponses:**
+Main method:
+The program first verifies if the user's cellphone number already exists in the Cloudant database. If the user's number already exists, it begins analyzing the user's text if the text is valid. Or it creates a new survey datapoint, disregards the user's inputted text, and asks the appropriate question. If not, then a datapoint is created for the user, the inputted text from the user is discarded, and the user is asked the first survey question.
 
-A great feature to add would be specialized error messages to inform the user how their input was incorrect and how they can fix it.
+If the user's input text is simply just "rate", the system will ignore it and repeat the same question. In the above cases if the user asks for a bus rating, even if the user has not yet texted the system, the program will provide the appropriate rating and question for that user.
+
+For the analysis portion, the program checks which question the user is currently answering. In the user database, there are two variables tracking the user's progress through each survey: convoNum and currentQuestionNum. currentQuestionNum is used to provide progress feedback to the user. At the beginning of each sms message, it indicates how many questions the user has answered out of 6 questions. convoNum is used to match the user's input to the correct question number. Except for question 1 which will always be provided first, the remaining 5 questions are randomly provided with each survey via the pickNextSurveyQuestion method. convoNum is used to select the correct question from the config question array and match the user's response to that number in the database.
+
+The program also checks whether the inputted bus has been created in the bus database or if it should be created. If the user's text is valid for that question, the user and bus databases will be updated. If the text is incorrect or if there are any errors, the system will simply repeat the same question. A great feature to add would be specialized error messages to inform the user how their input was incorrect and how they can fix it.
 
 For further questions, please contact Michelle Sit at msit@mit.edu
